@@ -104,7 +104,6 @@ jssandersllc-infra/
     └── journal-template.md
 ```
 
-**Scenarios** are the recommended entry point for reviewers. Each one follows a single thread, from business risk through architectural decision, implementation, detection, and validation, linking to the actual artifacts in `onprem/`, `hybrid/`, and `lab/`. Start with [Site Theft Response](scenarios/site-theft-response/) to see how the trigger incident connects to every system in the project.
 
 **ADRs** follow a globally sequential numbering system (`ADR-NNNN-short-slug.md`) across all scopes. Each records the context, options considered, decision, and consequences.
 
