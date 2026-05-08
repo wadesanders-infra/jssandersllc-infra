@@ -85,12 +85,6 @@ Governance threads throughout. Eramba deploys in Workstream 1 and accumulates co
 jssandersllc-infra/
 ├── README.md
 ├── outline.md                  ← Full project plan with scope and rationale
-├── scenarios/                  ← End-to-end narrative threads (start here)
-│   ├── site-theft-response/
-│   ├── credential-theft-domain-compromise/
-│   ├── contractor-data-exfiltration/
-│   ├── hybrid-identity-abuse/
-│   └── baseline-to-hardened/
 ├── onprem/
 │   ├── journal/                ← Session-based lab notebook entries
 │   ├── decisions/              ← Architecture Decision Records (ADRs)
