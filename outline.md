@@ -28,8 +28,7 @@ The project operates in two contexts, and it's honest about what each one provid
 
 The AD forest root is `ad.jssandersllc.org`, a subdomain of the real owned domain `jssandersllc.org`. This avoids split-brain DNS, `.local` conflicts, and public CA certificate issues. `jssandersllc.org` is added as a UPN suffix so user accounts read as `user@jssandersllc.org`.
 
------
-
+---
 ## Hardware
 
 | Device | Role |
@@ -37,9 +36,13 @@ The AD forest root is `ad.jssandersllc.org`, a subdomain of the real owned domai
 | Cisco ASA 5506-X | Perimeter firewall and inter-VLAN router. Primary enforcement layer: NAT, inter-VLAN ACLs with security levels, syslog to Wazuh. |
 | Cisco SG350-10 | Managed switch. Layer 2 VLAN tagging only. No routing, no ACL enforcement. |
 | Dell OptiPlex 9020 | Hyper-V host for production VMs. NIC configured as 802.1Q trunk carrying VLAN-tagged traffic to VMs via Hyper-V vSwitches. |
+| Dell OptiPlex 3050 Micro #1 | Wazuh SIEM/XDR manager. Bare metal on MGMT VLAN. 8 GB RAM, 240 GB SSD. Monitoring runs on hardware independent of the hypervisor it monitors. |
+| Dell OptiPlex 3050 Micro #2 | DVR integration host at the Swann camera building. Bare metal. 8 GB RAM, 240 GB SSD. Pulls DVR event logs, forwards telemetry to Wazuh, retains footage per policy. |
+| HP Pavilion x360 | Domain-joined field workstation on CLIENTS VLAN. Primary device for Workstream 3 secure access validation on real hardware over external networks. |
+| Dell Latitude E6500 | Domain-joined contractor workstation on CLIENTS VLAN. Configured in contractor OU with restricted GPO and scoped file share access. Runs telemetry generation scripts under contractor credentials. |
 | Primary desktop (i7-12700K, RTX 5070 Ti) | Lab host (cloned production VMs + Kali on isolated internal-only vSwitch), development workstation, documentation, Ollama + Open WebUI. Sits on the USER VLAN for production network access; lab VMs run on a separate internal-only vSwitch with no external uplink. |
 
-The ASA is the enforcement layer. The SG350 handles tagging. The OptiPlex is production compute. The desktop is lab compute and development. These roles are distinct and shouldn't be confused.
+The ASA is the enforcement layer. The SG350 handles tagging. The OptiPlex is production compute. The Micros are dedicated bare metal hosts for monitoring and DVR integration. The laptops are domain-joined endpoints generating real telemetry. The desktop is lab compute and development. These roles are distinct and shouldn't be confused.
 
 ## Network Architecture
 
@@ -50,7 +53,7 @@ The ASA is the enforcement layer. The SG350 handles tagging. The OptiPlex is pro
 | MGMT | 10 | 10.10.10.0/24 | Infrastructure management, monitoring (Wazuh) |
 | SERVERS | 20 | 10.10.20.0/24 | Domain controller, document management, video management |
 | CLIENTS | 30 | 10.10.30.0/24 | Business workstations |
-| USER | 50 | 10.10.50.0/24 | Main desktop |
+| USER | 50 | 10.10.50.0/24 | Main desktop, LLM stack |
 
 All production VLANs are enforced by ASA ACLs with security levels governing inter-VLAN traffic.
 
@@ -66,10 +69,23 @@ The lab runs on the primary desktop on an internal-only Hyper-V vSwitch with no 
 |---|---|---|
 | DC01 | SERVERS | Domain controller (AD DS, DNS, DHCP) |
 | SRV01 | SERVERS | Member server: Entra Connect Sync, document management |
-| Wazuh | MGMT | SIEM/XDR manager |
 | Jumpbox | MGMT | Admin workstation for management access |
 | Win11-01 | CLIENTS | Business workstation (hybrid-joined) |
 | Win10-02 | CLIENTS | Business workstation |
+
+### Bare Metal Hosts
+
+| Host | VLAN | Role |
+|---|---|---|
+| Micro #1 (Wazuh) | MGMT | SIEM/XDR manager. Runs on dedicated hardware independent of the hypervisor it monitors. |
+| Micro #2 (DVR Integration) | Remote site | DVR event forwarding, footage retention, Wazuh agent. Located at the Swann camera building on its existing internet connection. |
+
+### Physical Endpoints
+
+| Device | VLAN | Role |
+|---|---|---|
+| HP Pavilion x360 | CLIENTS | Field workstation. Hybrid-joined to Entra ID for Workstream 3 secure access validation. |
+| Dell Latitude E6500 | CLIENTS | Contractor workstation. Restricted OU, scoped GPO, telemetry generation scripts. |
 
 ### Lab (Primary Desktop, Internal-Only vSwitch)
 
@@ -79,26 +95,25 @@ The lab runs on the primary desktop on an internal-only Hyper-V vSwitch with no 
 | Win10-Lab | Cloned workstation (lateral movement target) |
 | Kali | Attack platform |
 
-Lab VMs are cloned from production at the end of Workstream 1 and maintained as a stable baseline. The lab user population (`OU=LabUsers` with 15–20 simulated accounts) is created exclusively on DC01-Lab after cloning.
+Lab VMs are cloned from production at the end of Workstream 1 and maintained as a stable baseline. The lab user population (`OU=LabUsers` with 15 to 20 simulated accounts) is created exclusively on DC01-Lab after cloning.
 
 ## Cloud Footprint
 
 A free Entra ID tenant extends the on-prem domain into Azure via Entra Connect Sync running on SRV01 (never on the DC). One cloud-only Global Admin with MFA serves as the break-glass account and is never synced from on-prem. Sync is scoped to a dedicated `OU=SyncUsers` to keep cloud projection deliberate.
 
------
-
+---
 ## How the Project Is Organized
 
 The project is organized into four workstreams. Each workstream groups related work that shares a common purpose. The workstreams are sequential at a high level (you can't deploy business systems without infrastructure, can't secure what doesn't exist yet) but individual tasks within a workstream can overlap.
 
 | Workstream | Purpose | Estimated Duration |
 |---|---|---|
-| 1. Foundation | Build the network and identity platform everything else runs on | 1–2 weeks |
-| 2. Business Systems | Deploy the services that solve real operational problems | 2–3 weeks |
+| 1. Foundation | Build the network and identity platform everything else runs on | 1 to 2 weeks |
+| 2. Business Systems | Deploy the services that solve real operational problems | 2 to 3 weeks |
 | 3. Secure Access | Make business systems safely accessible from the field | 1 week |
-| 4. Security Program | Monitor, assess, test, harden, measure, and close out governance | 6–8 weeks |
+| 4. Security Program | Monitor, assess, test, harden, measure, and close out governance | 6 to 8 weeks |
 
-Total estimated timeline: 10–14 weeks with part-time effort. This runs alongside WGU coursework and an active job search.
+Total estimated timeline: 10 to 14 weeks with part-time effort. This runs alongside WGU coursework and an active job search.
 
 ### Threads That Run Throughout
 
@@ -110,8 +125,7 @@ A few things are deployed early and maintained across the entire project rather 
 
 **Snapshot discipline.** Hyper-V snapshots are taken at each workstream boundary with consistent naming. Before starting, estimate snapshot sizes per VM and verify available disk on the OptiPlex. Certain snapshots are permanent anchors (clean build, vulnerable baseline, hardened state). Running out of disk mid-project is avoidable, so plan for it.
 
------
-
+---
 # Workstream 1: Foundation
 
 ## Purpose
@@ -129,6 +143,10 @@ This is the workstream I'm executing right now. Everything below is scoped to be
 - Hyper-V host provisioned with virtual switches mapped to VLANs
 - Production VLANs (MGMT, SERVERS, CLIENTS, USER) operational with ACLs enforcing segmentation
 - Internet access via NAT through the ASA
+- Micro #1 provisioned as bare metal Wazuh host on MGMT VLAN
+- Micro #2 provisioned at the Swann camera building for DVR integration
+- Laptops domain-joined on CLIENTS VLAN
+- Time synchronization hierarchy established: DC01 as authoritative NTP source for all domain-joined systems, ASA and DVR configured to sync against DC01 or the same upstream source, Hyper-V host time sync policy configured to avoid clock drift between host and guests
 
 ## Identity (Production)
 
@@ -142,8 +160,23 @@ This is the workstream I'm executing right now. Everything below is scoped to be
 - Group Policy Objects enforcing password policy, audit logging, and logon restrictions
 - Security groups that will govern access to documents (Workstream 2), surveillance (Workstream 2), and administrative functions
 - Domain-joined business workstations
+- Contractor workstation (Dell Latitude E6500) configured in contractor OU with restricted GPO and scoped file share access
+- Tiered administrative access model documented and enforced: Tier 0 (DCs, identity infrastructure), Tier 1 (member servers), Tier 2 (workstations/endpoints). Separate admin accounts for privileged operations, admin access restricted to Jumpbox, deny workstation logon for server admin accounts. The environment has two permanent users, not two hundred, but documenting the tiering principle and enforcing it via GPO demonstrates identity security design at any scale.
 
 The identity layer is honest about scale. Two permanent users, a handful of contractor and service accounts. The complexity comes from access control logic (who can see what and why) not from headcount.
+
+## Data Classification
+
+A lightweight classification model established before file shares and permissions are configured. Every NTFS permission, security group assignment, and contractor access scope traces back to this model rather than ad hoc justification.
+
+| Classification | Examples | Required Controls |
+|---|---|---|
+| Public | Marketing material | Minimal restrictions |
+| Internal | Operational documents, general correspondence | Authenticated access |
+| Confidential | Contracts, financials, equipment records | RBAC + logging |
+| Restricted | Surveillance footage, HR records | Least privilege + audit review |
+
+This model is a single reference artifact stored in `onprem/artifacts/`. It informs file share NTFS permissions, contractor access scoping, IR severity classification, Eramba control evidence, and any future DLP considerations. The classification drives the access control logic rather than the other way around.
 
 ## Lab Environment Setup
 
@@ -159,9 +192,17 @@ The lab user population (`OU=LabUsers`) is not created at this stage. It is buil
 
 ## Cross-Project Tool Deployment
 
-- Eramba Community Edition deployed on the SERVERS VLAN; asset inventory created; initial control mapping started
+- Eramba Community Edition deployed on the SERVERS VLAN; asset inventory created with criticality ratings, business dependency, recovery priority, and acceptable downtime documented per asset; initial control mapping started
 - Skeleton README committed
 - First journal entry documenting starting state: hardware inventory, goals, expectations
+
+Asset criticality ratings justify segmentation decisions, monitoring priorities, backup frequency, and alert severity throughout the project. Example:
+
+| Asset | Criticality | RTO | Rationale |
+|---|---|---|---|
+| DC01 | Critical | 4h | All identity and DNS resolution depends on it |
+| Wazuh (Micro #1) | High | 24h | Detection visibility, no operational dependency |
+| DVR Integration (Micro #2) | Medium | 24h | Investigative continuity, not real-time operations |
 
 ## ADRs for This Workstream
 
@@ -171,10 +212,17 @@ The lab user population (`OU=LabUsers`) is not created at this stage. It is buil
 4. **OU design rationale:** production OU structure reflecting actual business roles and access needs; no lab users in production AD
 5. **Contractor access design:** how external parties receive scoped access to specific file shares, what restrictions are applied, why this approach over alternatives
 6. **Lab isolation on dedicated hardware:** why the lab runs as cloned VMs on the desktop rather than as a VLAN on the production network, covering physical isolation, resource constraints, and SID/replication conflict avoidance
+7. **Hardware reallocation and service placement:** why Wazuh moves to dedicated bare metal, why Micro #2 goes to the Swann building for DVR integration rather than serving as backup or spare, and laptop role assignments
+8. **Data classification model:** why a formal classification standard (Public, Internal, Confidential, Restricted) is established before file shares are configured, and how it drives access control decisions across the project
+9. **Tiered administrative access:** why separate admin accounts and Jumpbox-only admin access are enforced even in a two-person environment, covering the principle and the GPO implementation
 
 ## Exit Criteria
 
 - [ ] All production VMs deployed and domain-joined
+- [ ] Micro #1 provisioned as bare metal Wazuh host on MGMT VLAN
+- [ ] Micro #2 provisioned at Swann building with network connectivity to DVR
+- [ ] Laptops domain-joined on CLIENTS VLAN (Pavilion as field workstation, Latitude as contractor workstation)
+- [ ] Contractor workstation configured in contractor OU with restricted GPO and scoped file share access
 - [ ] Production OU structure with two real user accounts and appropriate permissions
 - [ ] Contractor access mechanism configured with scoped permissions
 - [ ] GPOs enforcing password policy and audit logging
@@ -182,7 +230,11 @@ The lab user population (`OU=LabUsers`) is not created at this stage. It is buil
 - [ ] Eramba deployed with asset inventory
 - [ ] Production VMs cloned to desktop; lab environment verified functional on internal-only vSwitch
 - [ ] Lab baseline snapshot taken: `Lab: Clean Clone`
-- [ ] ADRs committed (domain name, hypervisor, VLAN design, OU design, contractor access, lab isolation)
+- [ ] ADRs committed (domain name, hypervisor, VLAN design, OU design, contractor access, lab isolation, hardware reallocation, data classification, tiered admin)
+- [ ] Data classification model documented and referenced by file share permissions
+- [ ] Tiered admin access enforced via GPO (separate admin accounts, Jumpbox-only admin access, deny workstation logon for server admins)
+- [ ] Time synchronization verified across domain-joined systems, ASA, and DVR
+- [ ] Eramba asset inventory includes criticality ratings, RTO, and business dependency per asset
 - [ ] Skeleton README committed
 - [ ] First journal entry committed
 - [ ] Hyper-V snapshot: `WS1: Clean Build` (production, on OptiPlex)
@@ -190,17 +242,21 @@ The lab user population (`OU=LabUsers`) is not created at this stage. It is buil
 ## Deliverables
 
 - Operational segmented network with domain-joined endpoints
+- Bare metal hosts provisioned (Wazuh on MGMT VLAN, DVR integration host at camera building)
+- Domain-joined laptops on CLIENTS VLAN with contractor workstation configured
+- Data classification model artifact
+- Tiered administrative access documentation and GPO configuration
+- Time synchronization hierarchy documented and verified
 - Network diagram (versioned)
 - ASA ACL ruleset documentation
 - OU diagram and GPO summary
 - User and group inventory
 - Contractor access design documentation
-- Eramba: initial asset inventory and control mapping
+- Eramba: initial asset inventory with criticality ratings and control mapping
 - ADRs documenting the decisions listed above
 - Journal entries in `onprem/journal/`
 
------
-
+---
 # Workstream 2: Business Systems
 
 ## Purpose
@@ -219,20 +275,22 @@ What gets built: a self-hosted document management platform (Paperless-ngx is th
 
 The Swann camera system runs autonomously. Footage records, auto-deletes on a fixed cycle, and sends undifferentiated motion alerts to a phone. There's no retention policy, no access controls, no audit trail, no documentation of camera placement rationale, and no integration with any other system. It's hardware that happens to be running, not a security program. This is the system that was in place when the theft occurred, and the reason no evidence was recoverable.
 
-What gets built: not a camera upgrade, but a retained evidence system. A written physical security policy covering retention, access, alerting, and incident procedures. Centralized management and remote access. Alert tuning replacing blanket motion notifications. Access controls on footage with audit logging so that who accessed what footage and when is itself a recoverable record. Event logging configured for ingestion by the monitoring stack in Workstream 4, enabling correlation between physical security events and system activity. Camera placement documentation. Platform evaluation (stay, migrate, or augment; ADR to follow).
+What gets built: not a camera upgrade, but a retained evidence system. Micro #2, deployed at the camera building in Workstream 1, serves as the DVR integration host. It pulls event logs from the Swann DVR, forwards telemetry to Wazuh via an encrypted agent connection over the building's existing internet, and retains footage clips per the retention policy. This closes the gap that existed during the theft: footage that was overwritten before it could be reviewed is now retained on dedicated hardware with a defined retention schedule.
+
+A written physical security policy covering retention, access, alerting, and incident procedures. Alert tuning replacing blanket motion notifications. Access controls on footage with audit logging so that who accessed what footage and when is itself a recoverable record. Event logging feeding the Wazuh SIEM enables correlation between physical security events and system activity. Camera placement documentation. Platform evaluation (stay, migrate, or augment; ADR to follow).
 
 ## Deliverables
 
 - Operational document management system with documented taxonomy, access controls, and ingestion workflow
-- Backup and retention policy documentation
+- DVR integration: Micro #2 forwarding surveillance telemetry to Wazuh with footage retention per policy
+- Backup and retention policy documentation: 3-2-1 strategy with encrypted external rotation, offline copy cadence, ransomware assumptions documented, quarterly restore validation schedule. Covers Paperless documents, surveillance exports, AD system state, Wazuh configs/rules, and Eramba data. Proportionate to the environment without enterprise immutable storage, but the reasoning and risk acceptance are documented.
 - Written physical security policy
 - Alert tuning and camera placement documentation
 - ADRs: document management platform selection, surveillance platform decision
 - Eramba: control mappings for document management and physical security controls with evidence
 - Journal entries in `onprem/journal/`
 
------
-
+---
 # Workstream 3: Secure Access
 
 ## Purpose
@@ -250,6 +308,7 @@ This workstream makes business systems accessible from the field without sacrifi
 - Secure remote access to business services (VPN, Entra-integrated access, or both; ADR to follow)
 - Conditional Access policies: MFA enforcement, device compliance checks, legacy auth blocking
 - Win11-01 hybrid-joined to Entra ID
+- HP Pavilion x360 hybrid-joined and validated as field access device over external network (cellular or external wifi at a job site)
 - SSO validated for document management and video surveillance access
 
 ## Deliverables
@@ -260,13 +319,12 @@ This workstream makes business systems accessible from the field without sacrifi
 - Eramba: control mappings for hybrid identity and access controls with evidence
 - Journal entries in `onprem/journal/` and `hybrid/journal/`
 
------
-
+---
 # Workstream 4: Security Program & Governance
 
 ## Purpose
 
-The theft proved three things: the business couldn't detect a security event, couldn't investigate it after the fact, and couldn't attribute it to anyone. Workstreams 1–3 build the systems that make detection, investigation, and attribution technically possible. This workstream proves they actually work and closes the gaps they don't cover.
+The theft proved three things: the business couldn't detect a security event, couldn't investigate it after the fact, and couldn't attribute it to anyone. Workstreams 1 to 3 build the systems that make detection, investigation, and attribution technically possible. This workstream proves they actually work and closes the gaps they don't cover.
 
 This is where the security program comes together. Monitoring, vulnerability assessment, attack simulation in the lab, detection engineering, incident response, hardening, measurable validation, and final governance reporting. These are components of one security program, not separate projects. The NIST 800-53 control alignment that has been building incrementally since Workstream 1 gets closed out here.
 
@@ -276,7 +334,7 @@ The lab lives inside this workstream. It's the staging environment where detecti
 
 Before attack simulation begins, the cloned DC (DC01-Lab) is populated with the simulated user environment:
 
-- `OU=LabUsers` created on DC01-Lab with 15–20 simulated user accounts distributed across roles (IT, Finance, HR, Operations) with varying privilege levels
+- `OU=LabUsers` created on DC01-Lab with 15 to 20 simulated user accounts distributed across roles (IT, Finance, HR, Operations) with varying privilege levels
 - Kerberoastable service accounts with SPNs registered
 - Overprivileged helpdesk users and nested group structures creating BloodHound attack paths
 - Weak passwords on select accounts
@@ -286,12 +344,14 @@ This expanded identity layer is a testing construct. It generates the conditions
 
 ## Monitoring
 
-- Wazuh SIEM/XDR deployed on the MGMT VLAN
-- Wazuh agents and Sysmon (SwiftOnSecurity config) on all business endpoints
+- Wazuh SIEM/XDR running on dedicated bare metal (Micro #1) on the MGMT VLAN
+- Wazuh agents and Sysmon (SwiftOnSecurity config) on all business endpoints and bare metal hosts
 - ASA syslog forwarded to Wazuh
-- Document management and video surveillance logs ingested
+- DVR event telemetry forwarded from Micro #2 at the Swann building
+- Document management logs ingested
 - Entra ID sign-in and audit logs forwarded to Wazuh
-- Alert rules targeting real business threats: unauthorized document access, failed AD logon patterns, denied ASA traffic, physical security events correlated with network access, anomalous Entra sign-ins
+- Contractor workstation telemetry from scheduled scripts running under scoped contractor credentials
+- Alert rules targeting real business threats: unauthorized document access, failed AD logon patterns, denied ASA traffic, physical security events correlated with network access, anomalous Entra sign-ins, contractor access outside scope
 - Operational dashboard for security posture visibility
 
 ## Vulnerability Assessment
@@ -314,6 +374,8 @@ The lab runs cloned production VMs with the expanded user population from `OU=La
 **Purple team loop (per detection):** Attack → check (did the Sigma rule fire?) → tune (false positives, evasion variants) → re-attack (validate) → document (iteration history). Deliverables show the iteration history, not just the final rule.
 
 **Detection promotion:** Validated rules deploy to the production Wazuh instance. This pipeline connects the lab to production and makes the lab operationally meaningful.
+
+**Control failure documentation:** False positives, failed detections, broken rules, logging gaps, and tuning iterations are preserved in the journal and in detection artifact commit history, not cleaned up before committing. A rule that failed to fire and required three iterations of tuning is a stronger portfolio artifact than a rule that worked on the first try with no visible development history. This is the same principle as the journal SOP: honest capture of what actually happened, including what did not work.
 
 ## Incident Response
 
@@ -347,7 +409,7 @@ The measurable delta between baseline and post-hardening scans is one of the str
 Eramba has been receiving control mappings and evidence since Workstream 1. This phase finishes the assessment:
 
 - Complete the mapping of all applicable NIST 800-53 controls to assets
-- Verify all evidence artifacts from Workstreams 1–4 are attached to corresponding controls
+- Verify all evidence artifacts from Workstreams 1 to 4 are attached to corresponding controls
 - Conduct risk assessments with likelihood and impact ratings
 - Document risk treatment: mitigated, accepted, or transferred
 - Generate control posture report
@@ -358,12 +420,15 @@ Eramba has been receiving control mappings and evidence since Workstream 1. This
 | Control | Title | Source | Evidence |
 |---|---|---|---|
 | AC-2 | Account Management | WS 1, 4 | AD user/group inventory, GPO docs |
-| AC-6 | Least Privilege | WS 1, 4 | Role-based access controls, hardening |
+| AC-5 | Separation of Duties | WS 1 | Tiered admin access model, separate admin accounts |
+| AC-6 | Least Privilege | WS 1, 4 | Role-based access controls, tiered admin, hardening |
 | AU-6 | Audit Record Review | WS 4 | Wazuh alert rules and dashboard |
-| CP-9 | System Backup | WS 2 | Document system backup documentation |
+| AU-8 | Time Stamps | WS 1 | NTP hierarchy documentation, sync verification across all systems |
+| CP-9 | System Backup | WS 2 | 3-2-1 backup strategy, restore validation, ransomware assumptions |
 | IA-5 | Authenticator Management | WS 1, 3, 4 | Password policy GPO, MFA, Conditional Access |
 | IR-4 | Incident Handling | WS 4 | IR runbooks, documented cases, post-incident review |
-| PE-6 | Monitoring Physical Access | WS 2 | Surveillance policy, retention, access controls |
+| PE-6 | Monitoring Physical Access | WS 2 | Surveillance policy, retention, access controls, DVR integration |
+| RA-2 | Security Categorization | WS 1 | Data classification model, asset criticality ratings |
 | RA-5 | Vulnerability Monitoring | WS 4 | OpenVAS baseline and delta reports |
 | SC-7 | Boundary Protection | WS 1, 4 | ASA ACLs, VLAN segmentation |
 | SI-4 | System Monitoring | WS 4 | Wazuh + Sysmon + Entra logs |
@@ -388,14 +453,20 @@ The business is small, but the methodology is the same one GRC analysts apply at
 - Control mapping table with evidence index
 - Journal entries in `onprem/journal/`, `hybrid/journal/`, and `lab/journal/`
 
------
-
+---
 ## GitHub Repository Structure
 
 ```
 jssandersllc-infra/
 ├── README.md
 ├── outline.md
+├── scenarios/
+│   ├── README.md
+│   ├── site-theft-response/
+│   ├── credential-theft-domain-compromise/
+│   ├── contractor-data-exfiltration/
+│   ├── hybrid-identity-abuse/
+│   └── baseline-to-hardened/
 ├── onprem/
 │   ├── journal/
 │   ├── decisions/
@@ -415,5 +486,6 @@ jssandersllc-infra/
     └── journal-template.md
 ```
 
-Documentation follows the ADR methodology (globally sequential `ADR-NNNN-short-slug.md`) and session-based journal entries (`YYYY-MM-DD-short-slug.md`). The Documentation SOP governs writing standards for both. The repository name reflects the business context. Lab work has its own subdirectory but lives inside the same repo because it serves the production environment.
+The `scenarios/` directory is the reviewer-facing navigation layer. Each scenario follows one thread end to end, from business risk through decision, implementation, detection, and validation, linking to artifacts in their operational directories. No content is duplicated; scenarios are curated link collections with narrative context.
 
+Documentation follows the ADR methodology (globally sequential `ADR-NNNN-short-slug.md`) and session-based journal entries (`YYYY-MM-DD-short-slug.md`). The Documentation SOP governs writing standards for both. The repository name reflects the business context. Lab work has its own subdirectory but lives inside the same repo because it serves the production environment.
