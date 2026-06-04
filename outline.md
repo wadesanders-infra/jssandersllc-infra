@@ -396,13 +396,6 @@ The business is small, but the methodology is the same one GRC analysts apply at
 jssandersllc-infra/
 ├── README.md
 ├── outline.md
-├── scenarios/
-│   ├── README.md
-│   ├── site-theft-response/
-│   ├── credential-theft-domain-compromise/
-│   ├── contractor-data-exfiltration/
-│   ├── hybrid-identity-abuse/
-│   └── baseline-to-hardened/
 ├── onprem/
 │   ├── journal/
 │   ├── decisions/
@@ -421,8 +414,6 @@ jssandersllc-infra/
     ├── adr-template.md
     └── journal-template.md
 ```
-
-The `scenarios/` directory is the reviewer-facing navigation layer. Each scenario follows one thread end to end, from business risk through decision, implementation, detection, and validation, linking to artifacts in their operational directories. No content is duplicated; scenarios are curated link collections with narrative context.
 
 Documentation follows the ADR methodology (globally sequential `ADR-NNNN-short-slug.md`) and session-based journal entries (`YYYY-MM-DD-short-slug.md`). The Documentation SOP governs writing standards for both. The repository name reflects the business context. Lab work has its own subdirectory but lives inside the same repo because it serves the production environment.
 
