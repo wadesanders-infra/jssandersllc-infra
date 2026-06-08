@@ -223,21 +223,21 @@ Asset criticality ratings justify segmentation decisions, monitoring priorities,
 - [ ] Micro #1 provisioned as bare metal Wazuh host on MGMT VLAN
 - [ ] Micro #2 provisioned at Swann building with network connectivity to DVR
 - [ ] Laptops domain-joined on CLIENTS VLAN (Pavilion as field workstation, Latitude as contractor workstation)
-- [ ] Contractor workstation configured in contractor OU with restricted GPO and scoped file share access
-- [ ] Production OU structure with two real user accounts and appropriate permissions
-- [ ] Contractor access mechanism configured with scoped permissions
-- [ ] GPOs enforcing password policy and audit logging
-- [ ] File shares with NTFS permissions configured
+- [x] Contractor workstation configured in contractor OU with restricted GPO and scoped file share access
+- [x] Production OU structure with two real user accounts and appropriate permissions
+- [x] Contractor access mechanism configured with scoped permissions
+- [x] GPOs enforcing password policy and audit logging
+- [x] File shares with NTFS permissions configured
 - [ ] Eramba deployed with asset inventory
 - [ ] Production VMs cloned to desktop; lab environment verified functional on internal-only vSwitch
 - [ ] Lab baseline snapshot taken: `Lab: Clean Clone`
 - [ ] ADRs committed (domain name, hypervisor, VLAN design, OU design, contractor access, lab isolation, hardware reallocation, data classification, tiered admin)
-- [ ] Data classification model documented and referenced by file share permissions
+- [x] Data classification model documented and referenced by file share permissions
 - [ ] Tiered admin access enforced via GPO (separate admin accounts, Jumpbox-only admin access, deny workstation logon for server admins)
 - [ ] Time synchronization verified across domain-joined systems, ASA, and DVR
 - [ ] Eramba asset inventory includes criticality ratings, RTO, and business dependency per asset
-- [ ] Skeleton README committed
-- [ ] First journal entry committed
+- [x] Skeleton README committed
+- [x] First journal entry committed
 - [ ] Hyper-V snapshot: `WS1: Clean Build` (production, on OptiPlex)
 
 ## Deliverables
