@@ -5,8 +5,7 @@
  
 **Date:** YYYY-MM-DD  
 **Status:** Accepted | Superseded by ADR-NNNN | Deprecated  
-**Phase:** 1–6 (maps to your build plan phases)
- 
+**Workstream:** 1-4
 ## Context
  
 What situation or requirement prompted this decision? State the problem,
