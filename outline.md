@@ -28,7 +28,8 @@ The project operates in two contexts, and it's honest about what each one provid
 
 The AD forest root is `ad.jssandersllc.org`, a subdomain of the real owned domain `jssandersllc.org`. This avoids split-brain DNS, `.local` conflicts, and public CA certificate issues. `jssandersllc.org` is added as a UPN suffix so user accounts read as `user@jssandersllc.org`.
 
----
+-----
+
 ## Hardware
 
 | Device | Role |
@@ -95,25 +96,26 @@ The lab runs on the primary desktop on an internal-only Hyper-V vSwitch with no 
 | Win10-Lab | Cloned workstation (lateral movement target) |
 | Kali | Attack platform |
 
-Lab VMs are cloned from production at the end of Workstream 1 and maintained as a stable baseline. The lab user population (`OU=LabUsers` with 15 to 20 simulated accounts) is created exclusively on DC01-Lab after cloning.
+Lab VMs are cloned from production at the end of Workstream 1 and maintained as a stable baseline. The lab user population (`OU=LabUsers` with 15–20 simulated accounts) is created exclusively on DC01-Lab after cloning.
 
 ## Cloud Footprint
 
 A free Entra ID tenant extends the on-prem domain into Azure via Entra Connect Sync running on SRV01 (never on the DC). One cloud-only Global Admin with MFA serves as the break-glass account and is never synced from on-prem. Sync is scoped to a dedicated `OU=SyncUsers` to keep cloud projection deliberate.
 
----
+-----
+
 ## How the Project Is Organized
 
 The project is organized into four workstreams. Each workstream groups related work that shares a common purpose. The workstreams are sequential at a high level (you can't deploy business systems without infrastructure, can't secure what doesn't exist yet) but individual tasks within a workstream can overlap.
 
 | Workstream | Purpose | Estimated Duration |
 |---|---|---|
-| 1. Foundation | Build the network and identity platform everything else runs on | 1 to 2 weeks |
-| 2. Business Systems | Deploy the services that solve real operational problems | 2 to 3 weeks |
+| 1. Foundation | Build the network and identity platform everything else runs on | 1–2 weeks |
+| 2. Business Systems | Deploy the services that solve real operational problems | 2–3 weeks |
 | 3. Secure Access | Make business systems safely accessible from the field | 1 week |
-| 4. Security Program | Monitor, assess, test, harden, measure, and close out governance | 6 to 8 weeks |
+| 4. Security Program | Monitor, assess, test, harden, measure, and close out governance | 6–8 weeks |
 
-Total estimated timeline: 10 to 14 weeks with part-time effort. This runs alongside WGU coursework and an active job search.
+Total estimated timeline: 10–14 weeks with part-time effort. This runs alongside WGU coursework and an active job search.
 
 ### Threads That Run Throughout
 
@@ -125,7 +127,8 @@ A few things are deployed early and maintained across the entire project rather 
 
 **Snapshot discipline.** Hyper-V snapshots are taken at each workstream boundary with consistent naming. Before starting, estimate snapshot sizes per VM and verify available disk on the OptiPlex. Certain snapshots are permanent anchors (clean build, vulnerable baseline, hardened state). Running out of disk mid-project is avoidable, so plan for it.
 
----
+-----
+
 # Workstream 1: Foundation
 
 ## Purpose
@@ -256,7 +259,8 @@ Asset criticality ratings justify segmentation decisions, monitoring priorities,
 - ADRs documenting the decisions listed above
 - Journal entries in `onprem/journal/`
 
----
+-----
+
 # Workstream 2: Business Systems
 
 ## Purpose
@@ -290,7 +294,8 @@ A written physical security policy covering retention, access, alerting, and inc
 - Eramba: control mappings for document management and physical security controls with evidence
 - Journal entries in `onprem/journal/`
 
----
+-----
+
 # Workstream 3: Secure Access
 
 ## Purpose
@@ -319,12 +324,13 @@ This workstream makes business systems accessible from the field without sacrifi
 - Eramba: control mappings for hybrid identity and access controls with evidence
 - Journal entries in `onprem/journal/` and `hybrid/journal/`
 
----
+-----
+
 # Workstream 4: Security Program & Governance
 
 ## Purpose
 
-The theft proved three things: the business couldn't detect a security event, couldn't investigate it after the fact, and couldn't attribute it to anyone. Workstreams 1 to 3 build the systems that make detection, investigation, and attribution technically possible. This workstream proves they actually work and closes the gaps they don't cover.
+The theft proved three things: the business couldn't detect a security event, couldn't investigate it after the fact, and couldn't attribute it to anyone. Workstreams 1–3 build the systems that make detection, investigation, and attribution technically possible. This workstream proves they actually work and closes the gaps they don't cover.
 
 This is where the security program comes together. Monitoring, vulnerability assessment, attack simulation in the lab, detection engineering, incident response, hardening, measurable validation, and final governance reporting. These are components of one security program, not separate projects. The NIST 800-53 control alignment that has been building incrementally since Workstream 1 gets closed out here.
 
@@ -334,7 +340,7 @@ The lab lives inside this workstream. It's the staging environment where detecti
 
 Before attack simulation begins, the cloned DC (DC01-Lab) is populated with the simulated user environment:
 
-- `OU=LabUsers` created on DC01-Lab with 15 to 20 simulated user accounts distributed across roles (IT, Finance, HR, Operations) with varying privilege levels
+- `OU=LabUsers` created on DC01-Lab with 15–20 simulated user accounts distributed across roles (IT, Finance, HR, Operations) with varying privilege levels
 - Kerberoastable service accounts with SPNs registered
 - Overprivileged helpdesk users and nested group structures creating BloodHound attack paths
 - Weak passwords on select accounts
@@ -409,7 +415,7 @@ The measurable delta between baseline and post-hardening scans is one of the str
 Eramba has been receiving control mappings and evidence since Workstream 1. This phase finishes the assessment:
 
 - Complete the mapping of all applicable NIST 800-53 controls to assets
-- Verify all evidence artifacts from Workstreams 1 to 4 are attached to corresponding controls
+- Verify all evidence artifacts from Workstreams 1–4 are attached to corresponding controls
 - Conduct risk assessments with likelihood and impact ratings
 - Document risk treatment: mitigated, accepted, or transferred
 - Generate control posture report
@@ -453,20 +459,14 @@ The business is small, but the methodology is the same one GRC analysts apply at
 - Control mapping table with evidence index
 - Journal entries in `onprem/journal/`, `hybrid/journal/`, and `lab/journal/`
 
----
+-----
+
 ## GitHub Repository Structure
 
 ```
 jssandersllc-infra/
 ├── README.md
 ├── outline.md
-├── scenarios/
-│   ├── README.md
-│   ├── site-theft-response/
-│   ├── credential-theft-domain-compromise/
-│   ├── contractor-data-exfiltration/
-│   ├── hybrid-identity-abuse/
-│   └── baseline-to-hardened/
 ├── onprem/
 │   ├── journal/
 │   ├── decisions/
@@ -485,7 +485,5 @@ jssandersllc-infra/
     ├── adr-template.md
     └── journal-template.md
 ```
-
-The `scenarios/` directory is the reviewer-facing navigation layer. Each scenario follows one thread end to end, from business risk through decision, implementation, detection, and validation, linking to artifacts in their operational directories. No content is duplicated; scenarios are curated link collections with narrative context.
 
 Documentation follows the ADR methodology (globally sequential `ADR-NNNN-short-slug.md`) and session-based journal entries (`YYYY-MM-DD-short-slug.md`). The Documentation SOP governs writing standards for both. The repository name reflects the business context. Lab work has its own subdirectory but lives inside the same repo because it serves the production environment.
