@@ -51,7 +51,7 @@ Every architectural decision is documented with rationale. Every workstream prod
 
 ## Architecture
 
-**Hardware:** Cisco ASA 5506-X (firewall/router) - Cisco SG350-10 (L2 switching) - Dell OptiPlex 9020 (production Hyper-V host) - Dell OptiPlex 3050 Micro #1 (Wazuh SIEM/XDR, bare metal on MGMT) - Dell OptiPlex 3050 Micro #2 (DVR integration host at the Swann camera building) - HP Pavilion x360 (field workstation) - Dell Latitude E6500 (contractor workstation) - Primary desktop i7-12700K (lab host)
+**Hardware:** Cisco ASA 5506-X (firewall/router) - Cisco SG350-10 (L2 switching) - Dell OptiPlex 9020 (production Hyper-V host) - Primary desktop i7-12700K (lab host)
 
 **Production Network:**
 
@@ -85,12 +85,6 @@ Governance threads throughout. Eramba deploys in Workstream 1 and accumulates co
 jssandersllc-infra/
 ├── README.md
 ├── outline.md                  ← Full project plan with scope and rationale
-├── scenarios/                  ← End-to-end narrative threads (start here)
-│   ├── site-theft-response/
-│   ├── credential-theft-domain-compromise/
-│   ├── contractor-data-exfiltration/
-│   ├── hybrid-identity-abuse/
-│   └── baseline-to-hardened/
 ├── onprem/
 │   ├── journal/                ← Session-based lab notebook entries
 │   ├── decisions/              ← Architecture Decision Records (ADRs)
@@ -110,26 +104,19 @@ jssandersllc-infra/
     └── journal-template.md
 ```
 
-**Scenarios** are the recommended entry point for reviewers. Each one follows a single thread, from business risk through architectural decision, implementation, detection, and validation, linking to the actual artifacts in `onprem/`, `hybrid/`, and `lab/`. Start with [Site Theft Response](scenarios/site-theft-response/) to see how the trigger incident connects to every system in the project.
-
 **ADRs** follow a globally sequential numbering system (`ADR-NNNN-short-slug.md`) across all scopes. Each records the context, options considered, decision, and consequences.
 
 **Journal entries** (`YYYY-MM-DD-short-slug.md`) capture what happened per working session: what was built, what broke, what was learned, and what's next.
 
 ## Key Decisions
 
-Architectural decisions are documented as ADRs. The decisions committed so far:
+Architectural decisions are documented as ADRs. A few that shape the project:
 
-- **Domain naming (ADR-0001):** why `ad.jssandersllc.org` over `.local` or a fabricated domain
-- **Hypervisor selection (ADR-0002):** why Hyper-V over Proxmox or ESXi given hardware and licensing constraints
-- **VLAN design (ADR-0003):** segment justification and default-deny ACL philosophy
-- **OU design (ADR-0004):** production-only AD structure reflecting actual business roles; no simulated users in production
-- **Flat security group structure (ADR-0005):** why a flat group model over AGDLP nesting at this scale
-- **Service account OU centralization (ADR-0006):** why service accounts live in one OU rather than placed with their servers
-- **Contractor access design (ADR-0007):** disabled-by-default accounts, scoped access, and expiration backstops
-- **Permissive USER VLAN rule (ADR-0008):** a deliberate, time-bound exception during buildout with a defined re-restriction trigger
-- **No domain join for the main desktop (ADR-0009):** why a personal device stays outside the company infrastructure
-
-Further ADRs (lab isolation, hardware reallocation and service placement, data classification model, tiered administrative access, Entra Connect placement) are documented as their corresponding workstreams execute.
+- **Domain naming:** why `ad.jssandersllc.org` over `.local` or a fabricated domain
+- **Hypervisor selection:** why Hyper-V over Proxmox or ESXi given hardware and licensing constraints
+- **VLAN design:** segment justification and ACL philosophy
+- **OU design:** production-only AD structure reflecting actual business roles; no simulated users in production
+- **Lab isolation:** why the lab runs as cloned VMs on dedicated hardware rather than as a VLAN on the production network
+- **Entra Connect placement:** why a member server and not the DC
 
 See [`onprem/decisions/`](onprem/decisions/), [`hybrid/decisions/`](hybrid/decisions/), and [`lab/decisions/`](lab/decisions/) for the full set.
