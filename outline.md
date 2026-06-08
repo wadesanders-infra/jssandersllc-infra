@@ -222,7 +222,7 @@ Asset criticality ratings justify segmentation decisions, monitoring priorities,
 - [ ] All production VMs deployed and domain-joined
 - [ ] Micro #1 provisioned as bare metal Wazuh host on MGMT VLAN
 - [ ] Micro #2 provisioned at Swann building with network connectivity to DVR
-- [ ] Laptops domain-joined on CLIENTS VLAN (Pavilion as field workstation, Latitude as contractor workstation)
+- [x] Laptops domain-joined on CLIENTS VLAN (Pavilion as field workstation, Latitude as contractor workstation)
 - [x] Contractor workstation configured in contractor OU with restricted GPO and scoped file share access
 - [x] Production OU structure with two real user accounts and appropriate permissions
 - [x] Contractor access mechanism configured with scoped permissions
