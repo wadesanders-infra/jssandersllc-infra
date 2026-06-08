@@ -71,8 +71,6 @@ The lab runs on the primary desktop on an internal-only Hyper-V vSwitch with no 
 | DC01 | SERVERS | Domain controller (AD DS, DNS, DHCP) |
 | SRV01 | SERVERS | Member server: Entra Connect Sync, document management |
 | Jumpbox | MGMT | Admin workstation for management access |
-| Win11-01 | CLIENTS | Business workstation (hybrid-joined) |
-| Win10-02 | CLIENTS | Business workstation |
 
 ### Bare Metal Hosts
 
