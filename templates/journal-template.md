@@ -2,7 +2,7 @@
  
 ### When to Write One
  
-Write a journal entry for each working session where you made meaningful progress, hit a wall, or changed direction. The journal is your lab notebook — it captures **what happened**, not what you decided (that's what ADRs are for).
+Write a journal entry for each working session where you made meaningful progress, hit a wall, or changed direction. The journal is your lab notebook: it captures **what happened**, not what you decided (that's what ADRs are for).
  
 Good triggers:
 - Completed a setup or configuration step
@@ -31,7 +31,7 @@ hybrid/journal/2026-05-10-entra-tenant-setup.md
 ### Template
  
 ```markdown
-# YYYY-MM-DD — Title Describing the Session
+# YYYY-MM-DD: Title Describing the Session
  
 **Phase:** 1–6  
 **Duration:** ~Xh  
@@ -50,7 +50,7 @@ built, tested, or broke. Include:
  
 ## What I Learned
  
-Key takeaways — things that clicked, misconceptions you corrected,
+Key takeaways: things that clicked, misconceptions you corrected,
 or how a technology actually behaves versus how you expected it to.
 This is the section future readers get the most from.
  
@@ -63,7 +63,7 @@ Problems you hit and how you resolved them. Include:
 - What actually fixed it (or if it's still open)
  
 If nothing went wrong, delete this section rather than writing
-"no issues" — that looks like you weren't paying attention.
+"no issues", which looks like you weren't paying attention.
  
 ## Open Questions
  

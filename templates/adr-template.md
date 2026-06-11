@@ -13,12 +13,12 @@ constraints, and any relevant facts. Keep it to 2–4 sentences.
  
 ## Options Considered
  
-### Option A — [Name]
+### Option A: [Name]
 - How it works (1–2 sentences)
 - Pros
 - Cons
  
-### Option B — [Name]
+### Option B: [Name]
 - How it works (1–2 sentences)
 - Pros
 - Cons
@@ -28,7 +28,7 @@ constraints, and any relevant facts. Keep it to 2–4 sentences.
 ## Decision
  
 State the choice in one sentence. Then explain the reasoning in 2–3
-sentences — connect it to the project's constraints, requirements,
+sentences. Connect it to the project's constraints, requirements,
 and the workstream it serves.
  
 ## Consequences
@@ -44,7 +44,7 @@ and the workstream it serves.
 - **Context should stand alone.** Someone reading just the Context section should understand the problem without needing other documents.
 - **Options Considered is not filler.** Only list alternatives you actually thought through. If there was really only one viable option, say so and explain why.
 - **Consequences are forward-looking.** What does this decision mean for the next phase? What doors does it close?
-- **Keep it short.** A good ADR is half a page to one page. If you're writing more, you're probably combining multiple decisions — split them.
+- **Keep it short.** A good ADR is half a page to one page. If you're writing more, you're probably combining multiple decisions; split them.
  
 ### Status Lifecycle
  

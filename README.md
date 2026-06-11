@@ -4,7 +4,7 @@ J.S. Sanders LLC is a land development company operating across active job sites
 
 Despite the business's scale and exposure, it had no formal IT infrastructure. No network segmentation, no centralized identity, no document management, no logging, and no security program.
 
-> **Where the project stands:** Workstream 1 (network, identity, endpoints) is largely built, with verification in progress. Workstreams 2–4 (business systems, secure access, security program) are designed and sequenced but not yet built. Status is marked throughout this README — anything labeled *Planned* is a design target, not a finished system.
+> **Where the project stands:** Workstream 1 (network, identity, endpoints) is largely built, with verification in progress. Workstreams 2–4 (business systems, secure access, security program) are designed and sequenced but not yet built. Status is marked throughout this README; anything labeled *Planned* is a design target, not a finished system.
 
 ## What Triggered This Project
 
@@ -40,12 +40,12 @@ Every architectural decision is documented with rationale. Every workstream prod
 
 | Area | Before | Target | Status |
 |---|---|---|---|
-| **Network** | Flat topology, no segmentation | Four production VLANs enforced by Cisco ASA ACLs | ✅ Built — temporary permissive USER VLAN rule during buildout (ADR-0008) |
-| **Identity** | No centralized accounts or access control | Active Directory with OU structure, GPOs, RBAC, and scoped contractor access | ✅ Built — core verified; contractor-scope verification continuing |
+| **Network** | Flat topology, no segmentation | Four production VLANs enforced by Cisco ASA ACLs | ✅ Built: temporary permissive USER VLAN rule during buildout (ADR-0008) |
+| **Identity** | No centralized accounts or access control | Active Directory with OU structure, GPOs, RBAC, and scoped contractor access | ✅ Built: core verified; contractor-scope verification continuing |
 | **Endpoints** | Unmanaged personal devices | Domain-joined, GPO-managed Windows endpoints | 🔄 In progress |
 | **Documents** | Paper in filing cabinets, not searchable, not field-accessible | Self-hosted DMS with OCR, full-text search, and AD-integrated access controls | 🔜 Planned |
 | **Surveillance** | Cameras recording autonomously with no retention policy, no access controls, no audit trail | Retained evidence system with role-based access, tuned alerts, and logs feeding SIEM | 🔜 Planned |
-| **Monitoring** | No logging, no alerting | Wazuh SIEM/XDR correlating endpoint, network, physical security, and cloud identity telemetry | 🔜 Planned — dedicated hardware staged, not yet deployed |
+| **Monitoring** | No logging, no alerting | Wazuh SIEM/XDR correlating endpoint, network, physical security, and cloud identity telemetry | 🔜 Planned: dedicated hardware staged, not yet deployed |
 | **Field Access** | None; systems only usable on-site | Hybrid identity via Entra Connect Sync, Conditional Access, MFA | 🔜 Planned |
 | **Incident Response** | No ability to detect, investigate, or attribute security events | Alert-driven detection, correlated logs in SIEM, defined response procedures | 🔜 Planned |
 | **Security Testing** | Nothing to test | ATT&CK-mapped attack simulation on physically isolated lab clone, Sigma-based detections promoted to production | 🔜 Planned |
@@ -109,7 +109,7 @@ jssandersllc-infra/
 
 **ADRs** follow a globally sequential numbering system (`ADR-NNNN-short-slug.md`) across all scopes. Each records the context, options considered, decision, and consequences.
 
-**Journal entries** (`YYYY-MM-DD-short-slug.md`) capture what happened per working session: what was built, what broke, what was learned, and what's next. Entries are honest about failures, open questions, and pauses — that's the point of keeping them.
+**Journal entries** (`YYYY-MM-DD-short-slug.md`) capture what happened per working session: what was built, what broke, what was learned, and what's next. Entries are honest about failures, open questions, and pauses; that's the point of keeping them.
 
 ## Key Decisions
 

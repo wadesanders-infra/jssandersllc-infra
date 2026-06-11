@@ -115,7 +115,7 @@ The project is organized into four workstreams. Each workstream groups related w
 | 3. Secure Access | Make business systems safely accessible from the field | 1 week |
 | 4. Security Program | Monitor, assess, test, harden, measure, and close out governance | 6–8 weeks |
 
-Original total estimate: 10–14 weeks of part-time effort. **Actual:** Workstream 1 alone ran roughly five weeks (May 6 – June 8 journals). The estimate assumed build time; verification, troubleshooting, and documentation dominated. Estimates for the remaining workstreams are left unchanged as a calibration reference — read them as sequencing, not schedule.
+Original total estimate: 10–14 weeks of part-time effort. **Actual:** Workstream 1 alone ran roughly five weeks (May 6 to June 8 journals). The estimate assumed build time; verification, troubleshooting, and documentation dominated. Estimates for the remaining workstreams are left unchanged as a calibration reference; read them as sequencing, not schedule.
 
 ### Threads That Run Throughout
 
