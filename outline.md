@@ -1,5 +1,7 @@
 # J.S. Sanders LLC: IT Infrastructure & Security Program
 
+> This document is the full project design; systems are described in present tense as design intent. Current build status is tracked in the README and the per-workstream exit criteria.
+
 ## What Triggered This Project
 
 J.S. Sanders LLC is a land development company operating across active job sites in the Awendaw, SC area. The business has generated over $3 million in revenue. It manages high-value physical assets (heavy equipment, vehicles, materials) distributed across sites with limited physical oversight.
@@ -106,14 +108,14 @@ A free Entra ID tenant extends the on-prem domain into Azure via Entra Connect S
 
 The project is organized into four workstreams. Each workstream groups related work that shares a common purpose. The workstreams are sequential at a high level (you can't deploy business systems without infrastructure, can't secure what doesn't exist yet) but individual tasks within a workstream can overlap.
 
-| Workstream | Purpose | Estimated Duration |
+| Workstream | Purpose | Original Estimate |
 |---|---|---|
 | 1. Foundation | Build the network and identity platform everything else runs on | 1–2 weeks |
 | 2. Business Systems | Deploy the services that solve real operational problems | 2–3 weeks |
 | 3. Secure Access | Make business systems safely accessible from the field | 1 week |
 | 4. Security Program | Monitor, assess, test, harden, measure, and close out governance | 6–8 weeks |
 
-Total estimated timeline: 10–14 weeks with part-time effort. This runs alongside WGU coursework and an active job search.
+Original total estimate: 10–14 weeks of part-time effort. **Actual:** Workstream 1 alone ran roughly five weeks (May 6 – June 8 journals). The estimate assumed build time; verification, troubleshooting, and documentation dominated. Estimates for the remaining workstreams are left unchanged as a calibration reference — read them as sequencing, not schedule.
 
 ### Threads That Run Throughout
 
@@ -228,12 +230,14 @@ Asset criticality ratings justify segmentation decisions, monitoring priorities,
 - [x] Contractor access mechanism configured with scoped permissions
 - [x] GPOs enforcing password policy and audit logging
 - [x] File shares with NTFS permissions configured
+- [ ] File share access model verified per role (jsanders verified; contractor01 pending)
 - [ ] Eramba deployed with asset inventory
 - [ ] Production VMs cloned to desktop; lab environment verified functional on internal-only vSwitch
 - [ ] Lab baseline snapshot taken: `Lab: Clean Clone`
 - [ ] ADRs committed (domain name, hypervisor, VLAN design, OU design, contractor access, lab isolation, hardware reallocation, data classification, tiered admin)
 - [x] Data classification model documented and referenced by file share permissions
 - [ ] Tiered admin access enforced via GPO (separate admin accounts, Jumpbox-only admin access, deny workstation logon for server admins)
+- [ ] USER VLAN broad permit removed; least-privilege ACLs reinstated (ADR-0008)
 - [ ] Time synchronization verified across domain-joined systems, ASA, and DVR
 - [ ] Eramba asset inventory includes criticality ratings, RTO, and business dependency per asset
 - [x] Skeleton README committed
@@ -310,7 +314,6 @@ This workstream makes business systems accessible from the field without sacrifi
 - Cloud-only Global Admin with MFA as break-glass account
 - Secure remote access to business services (VPN, Entra-integrated access, or both; ADR to follow)
 - Conditional Access policies: MFA enforcement, device compliance checks, legacy auth blocking
-- Win11-01 hybrid-joined to Entra ID
 - HP Pavilion x360 hybrid-joined and validated as field access device over external network (cellular or external wifi at a job site)
 - SSO validated for document management and video surveillance access
 

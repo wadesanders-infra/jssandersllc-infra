@@ -4,6 +4,8 @@ J.S. Sanders LLC is a land development company operating across active job sites
 
 Despite the business's scale and exposure, it had no formal IT infrastructure. No network segmentation, no centralized identity, no document management, no logging, and no security program.
 
+> **Where the project stands:** Workstream 1 (network, identity, endpoints) is largely built, with verification in progress. Workstreams 2–4 (business systems, secure access, security program) are designed and sequenced but not yet built. Status is marked throughout this README — anything labeled *Planned* is a design target, not a finished system.
+
 ## What Triggered This Project
 
 A piece of equipment worth over $5,000 was stolen from an active job site. No suspect was identified. No evidence was recovered.
@@ -18,7 +20,7 @@ Despite a small user population (two permanent employees plus scoped contractor 
 
 Everything in this repository exists because that failure happened.
 
-The infrastructure is designed so that a similar event would be detected in near real-time, logged across relevant systems, investigable after the fact, and attributable to a specific identity or access path.
+The infrastructure is designed so that a similar event would be detected in near real-time, logged across relevant systems, investigable after the fact, and attributable to a specific identity or access path. The descriptions below are the design intent for the full program; the status table that follows shows what is built versus planned.
 
 **Surveillance** is not cameras that happen to be recording. It's a retained evidence system with access controls, audit logging, tuned alerts, and event data feeding a centralized SIEM. When something happens, there is footage to review, a record of who accessed it, and a timeline to reconstruct.
 
@@ -34,39 +36,40 @@ The infrastructure is designed so that a similar event would be detected in near
 
 Every architectural decision is documented with rationale. Every workstream produces artifacts that feed the next. The repository documents not just what was built, but why each decision was made and what alternatives were rejected.
 
-## Before and After
+## Before → Target State
 
-| Area | Before | After |
-|---|---|---|
-| **Incident Response** | No ability to detect, investigate, or attribute security events | Alert-driven detection, correlated logs in SIEM, defined response procedures |
-| **Surveillance** | Cameras recording autonomously with no retention policy, no access controls, no audit trail | Retained evidence system with role-based access, tuned alerts, and logs feeding SIEM |
-| **Network** | Flat topology, no segmentation | Four production VLANs enforced by Cisco ASA ACLs |
-| **Identity** | No centralized accounts or access control | Active Directory with OU structure, GPOs, RBAC, and scoped contractor access |
-| **Documents** | Paper in filing cabinets, not searchable, not field-accessible | Self-hosted DMS with OCR, full-text search, and AD-integrated access controls |
-| **Field Access** | None; systems only usable on-site | Hybrid identity via Entra Connect Sync, Conditional Access, MFA |
-| **Monitoring** | No logging, no alerting | Wazuh SIEM/XDR correlating endpoint, network, physical security, and cloud identity telemetry |
-| **Security Testing** | Nothing to test | ATT&CK-mapped attack simulation on physically isolated lab clone, Sigma-based detections promoted to production |
-| **Vulnerability Mgmt** | No baseline | OpenVAS credentialed scans with measurable pre/post hardening delta |
-| **Governance** | No framework, no evidence | NIST 800-53 controls aligned to real infrastructure with evidence from each implementation phase |
+| Area | Before | Target | Status |
+|---|---|---|---|
+| **Network** | Flat topology, no segmentation | Four production VLANs enforced by Cisco ASA ACLs | ✅ Built — temporary permissive USER VLAN rule during buildout (ADR-0008) |
+| **Identity** | No centralized accounts or access control | Active Directory with OU structure, GPOs, RBAC, and scoped contractor access | ✅ Built — core verified; contractor-scope verification continuing |
+| **Endpoints** | Unmanaged personal devices | Domain-joined, GPO-managed Windows endpoints | 🔄 In progress |
+| **Documents** | Paper in filing cabinets, not searchable, not field-accessible | Self-hosted DMS with OCR, full-text search, and AD-integrated access controls | 🔜 Planned |
+| **Surveillance** | Cameras recording autonomously with no retention policy, no access controls, no audit trail | Retained evidence system with role-based access, tuned alerts, and logs feeding SIEM | 🔜 Planned |
+| **Monitoring** | No logging, no alerting | Wazuh SIEM/XDR correlating endpoint, network, physical security, and cloud identity telemetry | 🔜 Planned — dedicated hardware staged, not yet deployed |
+| **Field Access** | None; systems only usable on-site | Hybrid identity via Entra Connect Sync, Conditional Access, MFA | 🔜 Planned |
+| **Incident Response** | No ability to detect, investigate, or attribute security events | Alert-driven detection, correlated logs in SIEM, defined response procedures | 🔜 Planned |
+| **Security Testing** | Nothing to test | ATT&CK-mapped attack simulation on physically isolated lab clone, Sigma-based detections promoted to production | 🔜 Planned |
+| **Vulnerability Mgmt** | No baseline | OpenVAS credentialed scans with measurable pre/post hardening delta | 🔜 Planned |
+| **Governance** | No framework, no evidence | NIST 800-53 controls aligned to real infrastructure with evidence from each implementation phase | 🔜 Planned |
 
 ## Architecture
 
-**Hardware:** Cisco ASA 5506-X (firewall/router) - Cisco SG350-10 (L2 switching) - Dell OptiPlex 9020 (production Hyper-V host) - Primary desktop i7-12700K (lab host)
+**Hardware:** Cisco ASA 5506-X (firewall/router) - Cisco SG350-10 (L2 switching) - Dell OptiPlex 9020 (production Hyper-V host) - 2× Dell OptiPlex 3050 Micro (Wazuh SIEM host; DVR integration host) - HP Pavilion x360 (field workstation) - Dell Latitude E6500 (contractor workstation) - Primary desktop i7-12700K (lab host)
 
-**Production Network:**
+**Production Network (built):**
 
 | VLAN | ID | Subnet | Purpose |
 |---|---|---|---|
-| MGMT | 10 | 10.10.10.0/24 | Infrastructure management, monitoring (Wazuh) |
-| SERVERS | 20 | 10.10.20.0/24 | Domain controller, document management, video management |
+| MGMT | 10 | 10.10.10.0/24 | Infrastructure management; monitoring host (planned) |
+| SERVERS | 20 | 10.10.20.0/24 | Domain controller, member server; document and video management (planned) |
 | CLIENTS | 30 | 10.10.30.0/24 | Business workstations |
 | USER | 50 | 10.10.50.0/24 | Development workstation |
 
-**Lab Network:** Cloned production VMs + Kali running on an internal-only Hyper-V vSwitch on the desktop with no network path to production. The cloned DC carries the same domain name and SIDs as production; physical isolation is mandatory.
+**Lab Network (planned):** Cloned production VMs + Kali will run on an internal-only Hyper-V vSwitch on the desktop with no network path to production. The cloned DC will carry the same domain name and SIDs as production; physical isolation is mandatory.
 
 **Domain:** `ad.jssandersllc.org`, a subdomain of a real owned domain to avoid split-brain DNS, `.local` conflicts, and public CA issues.
 
-**Cloud:** Free Entra ID tenant linked via Entra Connect Sync on a member server (not the DC). Sync scoped to `OU=SyncUsers`. Cloud-only Global Admin with MFA as break-glass.
+**Cloud (planned, Workstream 3):** A free Entra ID tenant will be linked via Entra Connect Sync on a member server (not the DC). Sync will be scoped to `OU=SyncUsers`, with a cloud-only Global Admin with MFA as break-glass.
 
 ## Workstreams
 
@@ -98,7 +101,7 @@ jssandersllc-infra/
 ├── lab/
 │   ├── journal/
 │   ├── decisions/
-│   └── artifacts/              ← Sigma rules, attack documentation, heatmaps
+│   └── artifacts/              ← Sigma rules, attack documentation, heatmaps (Workstream 4)
 └── templates/
     ├── adr-template.md
     └── journal-template.md
@@ -106,7 +109,7 @@ jssandersllc-infra/
 
 **ADRs** follow a globally sequential numbering system (`ADR-NNNN-short-slug.md`) across all scopes. Each records the context, options considered, decision, and consequences.
 
-**Journal entries** (`YYYY-MM-DD-short-slug.md`) capture what happened per working session: what was built, what broke, what was learned, and what's next.
+**Journal entries** (`YYYY-MM-DD-short-slug.md`) capture what happened per working session: what was built, what broke, what was learned, and what's next. Entries are honest about failures, open questions, and pauses — that's the point of keeping them.
 
 ## Key Decisions
 
@@ -116,7 +119,7 @@ Architectural decisions are documented as ADRs. A few that shape the project:
 - **Hypervisor selection:** why Hyper-V over Proxmox or ESXi given hardware and licensing constraints
 - **VLAN design:** segment justification and ACL philosophy
 - **OU design:** production-only AD structure reflecting actual business roles; no simulated users in production
-- **Lab isolation:** why the lab runs as cloned VMs on dedicated hardware rather than as a VLAN on the production network
+- **Lab isolation:** why the lab will run as cloned VMs on dedicated hardware rather than as a VLAN on the production network
 - **Entra Connect placement:** why a member server and not the DC
 
 See [`onprem/decisions/`](onprem/decisions/), [`hybrid/decisions/`](hybrid/decisions/), and [`lab/decisions/`](lab/decisions/) for the full set.
