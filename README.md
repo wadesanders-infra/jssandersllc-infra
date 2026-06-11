@@ -4,7 +4,7 @@ J.S. Sanders LLC is a land development company operating across active job sites
 
 Despite the business's scale and exposure, it had no formal IT infrastructure. No network segmentation, no centralized identity, no document management, no logging, and no security program.
 
-> **Where the project stands:** Workstream 1 (network, identity, endpoints) is largely built, with verification in progress. Workstreams 2–4 (business systems, secure access, security program) are designed and sequenced but not yet built. Status is marked throughout this README — anything labeled *Planned* is a design target, not a finished system.
+> **Where the project stands:** Workstream 1 (network, identity, endpoints) is largely built, with verification in progress. Workstreams 2–4 (business systems, secure access, security program) are designed and sequenced but not yet built. Status is marked throughout this README - anything labeled *Planned* is a design target, not a finished system.
 
 ## What Triggered This Project
 
