@@ -51,9 +51,8 @@ built, tested, or broke. Include:
 ## What I Learned
  
 Key takeaways — things that clicked, misconceptions you corrected,
-or connections to coursework / cert material. This section is where
-the resume value lives. A hiring manager skimming your repo will
-read these.
+or how a technology actually behaves versus how you expected it to.
+This is the section future readers get the most from.
  
 ## Issues & Troubleshooting
  

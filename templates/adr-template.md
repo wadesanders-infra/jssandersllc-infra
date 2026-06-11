@@ -28,8 +28,8 @@ constraints, and any relevant facts. Keep it to 2–4 sentences.
 ## Decision
  
 State the choice in one sentence. Then explain the reasoning in 2–3
-sentences — connect it to your specific lab constraints, resume goals,
-or phase requirements.
+sentences — connect it to the project's constraints, requirements,
+and the workstream it serves.
  
 ## Consequences
  
