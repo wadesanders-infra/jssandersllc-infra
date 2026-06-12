@@ -6,6 +6,13 @@ Despite the business's scale and exposure, it had no formal IT infrastructure. N
 
 > **Where the project stands:** Workstream 1 (network, identity, endpoints) is largely built, with verification in progress. Workstreams 2–4 (business systems, secure access, security program) are designed and sequenced but not yet built. Status is marked throughout this README; anything labeled *Planned* is a design target, not a finished system.
 
+**Reviewing this repo?** Start with these four artifacts; they are representative of how the whole project is documented:
+
+- [Network topology diagram](onprem/diagrams/network-topology.md): the current build state, rendered, with built versus planned marked
+- [Workstation build and domain-join SOP](SOPs/workstation-domain-join-sop.md): a repeatable endpoint procedure written after a real process gap caused a real mistake
+- [Journal: workstation naming and placement](onprem/journal/2026-06-12-workstation-naming-placement.md): root-cause analysis of that gap, the fix, and the standard that came out of it
+- [ADR-0008: temporary permissive USER VLAN rule](onprem/decisions/ADR-0008-permissive-user-vlan-rule.md): how risk acceptance and technical debt are documented here, with a defined payoff trigger instead of a vague "later"
+
 ## What Triggered This Project
 
 A piece of equipment worth over $5,000 was stolen from an active job site. No suspect was identified. No evidence was recovered.
@@ -112,17 +119,4 @@ jssandersllc-infra/
 
 **Journal entries** (`YYYY-MM-DD-short-slug.md`) capture what happened per working session: what was built, what broke, what was learned, and what's next. Entries are honest about failures, open questions, and pauses; that's the point of keeping them.
 
-**SOPs** codify repeatable procedures after a process gap causes a real mistake. Each one encodes the corrected workflow; the first covers workstation naming, domain join, OU placement, and verification.
-
-## Key Decisions
-
-Architectural decisions are documented as ADRs. A few that shape the project:
-
-- **Domain naming:** why `ad.jssandersllc.org` over `.local` or a fabricated domain
-- **Hypervisor selection:** why Hyper-V over Proxmox or ESXi given hardware and licensing constraints
-- **VLAN design:** segment justification and ACL philosophy
-- **OU design:** production-only AD structure reflecting actual business roles; no simulated users in production
-- **Lab isolation:** why the lab will run as cloned VMs on dedicated hardware rather than as a VLAN on the production network
-- **Entra Connect placement:** why a member server and not the DC
-
-See [`onprem/decisions/`](onprem/decisions/), [`hybrid/decisions/`](hybrid/decisions/), and [`lab/decisions/`](lab/decisions/) for the full set.
+**SOPs** codify repeatable procedures after a process gap causes a real mistake. Each one encodes the corrected workflow; the first covers workstation naming, domai
