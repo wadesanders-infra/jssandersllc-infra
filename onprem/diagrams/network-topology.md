@@ -1,6 +1,6 @@
 # Network Topology
 
-**Last updated:** 2026-06-11
+**Last updated:** 2026-06-12
 
 Solid outlines and lines are built; dashed are planned or in flight. Port labels appear only where the physical cabling is documented (2026-05-06 journal): ASA p2 → SW p1 (802.1Q trunk), SW p2 → primary desktop (VLAN 50), SW p3 → Hyper-V host (802.1Q trunk).
 
@@ -30,8 +30,8 @@ flowchart TB
     end
 
     WAZ["Micro #1 - Wazuh SIEM/XDR<br/>MGMT, VLAN 10 - staged, not deployed"]
-    PAV["HP Pavilion x360 - field workstation<br/>CLIENTS, VLAN 30 - join in progress"]
-    LAT["Dell Latitude E6500 - contractor workstation<br/>CLIENTS, VLAN 30"]
+    PAV["JSS-WS01 - HP Pavilion x360, field workstation<br/>CLIENTS, VLAN 30"]
+    LAT["JSS-WS02 - Dell Latitude E6500, contractor workstation<br/>CLIENTS, VLAN 30"]
 
     SW ---|"SW p3, 802.1Q trunk"| HV
     SW ---|"SW p2, VLAN 50"| DESK
@@ -49,7 +49,7 @@ flowchart TB
     ENTRA(["Entra ID tenant - planned, WS3"])
     SRV01 -.->|"Entra Connect Sync"| ENTRA
 
-    class JUMP,LAB,DCL,W10,KALI,WAZ,M2,DVR,SWANN,ENTRA,PAV planned
+    class JUMP,LAB,DCL,W10,KALI,WAZ,M2,DVR,SWANN,ENTRA planned
 ```
 
 ## VLANs

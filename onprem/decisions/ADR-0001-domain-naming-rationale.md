@@ -6,7 +6,7 @@
 
 ## Context
 
-J.S. Sanders LLC needed an Active Directory forest root name before the domain controller could be promoted. The name is effectively permanent; renaming an AD forest after the fact is disruptive and risky, so the choice had to be right at promotion time. For a portfolio buildout I also wanted the naming to reflect current enterprise practice rather than a dated convention, so the decision would hold up under review by someone who has dealt with domain-naming consequences at scale.
+J.S. Sanders LLC needed an Active Directory forest root name before the domain controller could be promoted. The name is effectively permanent; renaming an AD forest after the fact is disruptive and risky, so the choice had to be right at promotion time. I also wanted the naming to reflect current enterprise practice rather than a dated convention, so the decision would hold up under review by someone who has dealt with domain-naming consequences at scale.
 
 ## Options Considered
 

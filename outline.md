@@ -85,8 +85,8 @@ The lab runs on the primary desktop on an internal-only Hyper-V vSwitch with no 
 
 | Device | VLAN | Role |
 |---|---|---|
-| HP Pavilion x360 | CLIENTS | Field workstation. Hybrid-joined to Entra ID for Workstream 3 secure access validation. |
-| Dell Latitude E6500 | CLIENTS | Contractor workstation. Restricted OU, scoped GPO, telemetry generation scripts. |
+| HP Pavilion x360 (JSS-WS01) | CLIENTS | Field workstation. Hybrid-joined to Entra ID for Workstream 3 secure access validation. |
+| Dell Latitude E6500 (JSS-WS02) | CLIENTS | Contractor workstation. Restricted OU, scoped GPO, telemetry generation scripts. |
 
 ### Lab (Primary Desktop, Internal-Only vSwitch)
 
@@ -224,8 +224,8 @@ Asset criticality ratings justify segmentation decisions, monitoring priorities,
 - [ ] All production VMs deployed and domain-joined
 - [ ] Micro #1 provisioned as bare metal Wazuh host on MGMT VLAN
 - [ ] Micro #2 provisioned at Swann building with network connectivity to DVR
-- [x] Laptops domain-joined on CLIENTS VLAN (Pavilion as field workstation, Latitude as contractor workstation)
-- [x] Contractor workstation configured in contractor OU with restricted GPO and scoped file share access
+- [x] Laptops domain-joined on CLIENTS VLAN as JSS-WS01 (field) and JSS-WS02 (contractor), named and OU-placed per the workstation SOP
+- [ ] Contractor workstation restricted GPO built and linked to the Contractor-Workstations OU (OU placement done; GPO build pending)
 - [x] Production OU structure with two real user accounts and appropriate permissions
 - [x] Contractor access mechanism configured with scoped permissions
 - [x] GPOs enforcing password policy and audit logging
@@ -257,6 +257,7 @@ Asset criticality ratings justify segmentation decisions, monitoring priorities,
 - OU diagram and GPO summary
 - User and group inventory
 - Contractor access design documentation
+- Workstation build and domain-join SOP (`SOPs/`)
 - Eramba: initial asset inventory with criticality ratings and control mapping
 - ADRs documenting the decisions listed above
 - Journal entries in `onprem/journal/`
@@ -382,7 +383,7 @@ The lab runs cloned production VMs with the expanded user population from `OU=La
 
 **Detection promotion:** Validated rules deploy to the production Wazuh instance. This pipeline connects the lab to production and makes the lab operationally meaningful.
 
-**Control failure documentation:** False positives, failed detections, broken rules, logging gaps, and tuning iterations are preserved in the journal and in detection artifact commit history, not cleaned up before committing. A rule that failed to fire and required three iterations of tuning is a stronger portfolio artifact than a rule that worked on the first try with no visible development history. This is the same principle as the journal SOP: honest capture of what actually happened, including what did not work.
+**Control failure documentation:** False positives, failed detections, broken rules, logging gaps, and tuning iterations are preserved in the journal and in detection artifact commit history, not cleaned up before committing. A rule that failed to fire and required three iterations of tuning is a stronger artifact than a rule that worked on the first try with no visible development history. This is the same principle as the journal SOP: honest capture of what actually happened, including what did not work.
 
 ## Incident Response
 
@@ -482,6 +483,7 @@ jssandersllc-infra/
 │   ├── journal/
 │   ├── decisions/
 │   └── artifacts/
+├── SOPs/
 └── templates/
     ├── adr-template.md
     └── journal-template.md

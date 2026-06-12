@@ -42,7 +42,7 @@ Every architectural decision is documented with rationale. Every workstream prod
 |---|---|---|---|
 | **Network** | Flat topology, no segmentation | Four production VLANs enforced by Cisco ASA ACLs | ✅ Built: temporary permissive USER VLAN rule during buildout (ADR-0008) |
 | **Identity** | No centralized accounts or access control | Active Directory with OU structure, GPOs, RBAC, and scoped contractor access | ✅ Built: core verified; contractor-scope verification continuing |
-| **Endpoints** | Unmanaged personal devices | Domain-joined, GPO-managed Windows endpoints | 🔄 In progress |
+| **Endpoints** | Unmanaged personal devices | Domain-joined, GPO-managed Windows endpoints | 🔄 In progress: workstations joined, named, and OU-placed per SOP; contractor GPO pending |
 | **Documents** | Paper in filing cabinets, not searchable, not field-accessible | Self-hosted DMS with OCR, full-text search, and AD-integrated access controls | 🔜 Planned |
 | **Surveillance** | Cameras recording autonomously with no retention policy, no access controls, no audit trail | Retained evidence system with role-based access, tuned alerts, and logs feeding SIEM | 🔜 Planned |
 | **Monitoring** | No logging, no alerting | Wazuh SIEM/XDR correlating endpoint, network, physical security, and cloud identity telemetry | 🔜 Planned: dedicated hardware staged, not yet deployed |
@@ -102,6 +102,7 @@ jssandersllc-infra/
 │   ├── journal/
 │   ├── decisions/
 │   └── artifacts/              ← Sigma rules, attack documentation, heatmaps (Workstream 4)
+├── SOPs/                       ← Standing operating procedures
 └── templates/
     ├── adr-template.md
     └── journal-template.md
@@ -110,6 +111,8 @@ jssandersllc-infra/
 **ADRs** follow a globally sequential numbering system (`ADR-NNNN-short-slug.md`) across all scopes. Each records the context, options considered, decision, and consequences.
 
 **Journal entries** (`YYYY-MM-DD-short-slug.md`) capture what happened per working session: what was built, what broke, what was learned, and what's next. Entries are honest about failures, open questions, and pauses; that's the point of keeping them.
+
+**SOPs** codify repeatable procedures after a process gap causes a real mistake. Each one encodes the corrected workflow; the first covers workstation naming, domain join, OU placement, and verification.
 
 ## Key Decisions
 
