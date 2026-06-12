@@ -119,4 +119,17 @@ jssandersllc-infra/
 
 **Journal entries** (`YYYY-MM-DD-short-slug.md`) capture what happened per working session: what was built, what broke, what was learned, and what's next. Entries are honest about failures, open questions, and pauses; that's the point of keeping them.
 
-**SOPs** codify repeatable procedures after a process gap causes a real mistake. Each one encodes the corrected workflow; the first covers workstation naming, domai
+**SOPs** codify repeatable procedures after a process gap causes a real mistake. Each one encodes the corrected workflow; the first covers workstation naming, domain join, OU placement, and verification.
+
+## Key Decisions
+
+Architectural decisions are documented as ADRs. A few that shape the project:
+
+- **Domain naming:** why `ad.jssandersllc.org` over `.local` or a fabricated domain
+- **Hypervisor selection:** why Hyper-V over Proxmox or ESXi given hardware and licensing constraints
+- **VLAN design:** segment justification and ACL philosophy
+- **OU design:** production-only AD structure reflecting actual business roles; no simulated users in production
+- **Lab isolation:** why the lab will run as cloned VMs on dedicated hardware rather than as a VLAN on the production network
+- **Entra Connect placement:** why a member server and not the DC
+
+See [`onprem/decisions/`](onprem/decisions/), [`hybrid/decisions/`](hybrid/decisions/), and [`lab/decisions/`](lab/decisions/) for the full set.
