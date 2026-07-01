@@ -14,10 +14,10 @@ flowchart LR
     classDef debt fill:#fce8e6,stroke:#d93025,stroke-width:2px,color:#111111
     classDef planned fill:#e8f0fe,stroke:#3367d6,stroke-dasharray:5 5,color:#111111
 
-    INET(["OUTSIDE / Internet<br/>sec-level 0 [VERIFY]<br/>double-NAT — ASA not yet true edge"]):::outside
-    SWANN(["Swann camera building<br/>remote site, own internet — planned WS2"]):::planned
+    INET(["OUTSIDE / Internet<br/>sec-level 0 [VERIFY]<br/>double-NAT; ASA not yet true edge"]):::outside
+    SWANN(["Swann camera building<br/>remote site, own internet; planned WS2"]):::planned
 
-    subgraph PROD["Production VLANs — every flow shown is enforced at the ASA (router-on-a-stick)"]
+    subgraph PROD["Production VLANs; every flow shown is enforced at the ASA (router-on-a-stick)"]
         direction LR
         MGMT["MGMT · VLAN 10<br/>10.10.10.0/24 · Wazuh (staged)<br/>sec-level [VERIFY] · ACL [VERIFY]"]:::unver
         SERVERS["SERVERS · VLAN 20<br/>10.10.20.0/24 · sec-level 80<br/>DC01 = 10.10.20.10 · ACL [VERIFY]"]:::zone
@@ -30,32 +30,32 @@ flowchart LR
     %% ---- current state ----
 
     %% explicit, scoped, permanent permit (USER_IN rule 1)
-    USER -->|"permit DNS 53 udp/tcp to DC01 — permanent"| SERVERS
+    USER -->|"permit DNS 53 udp/tcp to DC01; permanent"| SERVERS
 
-    %% temporary broad permit — the risk (USER_IN rule 2 / ADR-0008)
-    USER ==>|"permit ip 10.10.50.0/24 to ANY — TEMPORARY (ADR-0008), remove end of WS1"| ANYDEBT
+    %% temporary broad permit; the risk (USER_IN rule 2 / ADR-0008)
+    USER ==>|"permit ip 10.10.50.0/24 to ANY; TEMPORARY (ADR-0008), remove end of WS1"| ANYDEBT
     ANYDEBT -.-> MGMT
     ANYDEBT -.-> SERVERS
     ANYDEBT -.-> CLIENTS
 
-    %% functions in practice (joins, auth, GPO) — enforcement mechanism unverified
-    CLIENTS -.->|"AD services to DC01: DNS, Kerberos, LDAP, SMB — works in practice, mechanism [VERIFY]"| SERVERS
+    %% functions in practice (joins, auth, GPO); enforcement mechanism unverified
+    CLIENTS -.->|"AD services to DC01: DNS, Kerberos, LDAP, SMB; works in practice, mechanism [VERIFY]"| SERVERS
 
     %% to-the-box relay, documented 2026-05-10
-    CLIENTS -->|"DHCP via ASA dhcprelay to DC01 — built"| SERVERS
+    CLIENTS -->|"DHCP via ASA dhcprelay to DC01; built"| SERVERS
 
     %% implicit security-level behavior where no ACL is recorded
-    SERVERS -.->|"implicit sec 80 to 60 — permitted by default [VERIFY]"| USER
+    SERVERS -.->|"implicit sec 80 to 60; permitted by default [VERIFY]"| USER
 
     %% outbound internet for all production VLANs
-    PROD ==>|"NAT outbound — no inbound path while double-NAT'd"| INET
+    PROD ==>|"NAT outbound; no inbound path while double-NAT'd"| INET
 
     %% ---- planned flows (dashed, not yet built) ----
 
-    SERVERS -.->|"Entra Connect Sync outbound from SRV01 — planned WS3"| INET
-    CLIENTS -.->|"Wazuh agent telemetry — planned WS4"| MGMT
-    SERVERS -.->|"Wazuh agent telemetry — planned WS4"| MGMT
-    SWANN -.->|"Wazuh agent, encrypted over building internet — planned WS2, requires ASA as true edge"| MGMT
+    SERVERS -.->|"Entra Connect Sync outbound from SRV01; planned WS3"| INET
+    CLIENTS -.->|"Wazuh agent telemetry; planned WS4"| MGMT
+    SERVERS -.->|"Wazuh agent telemetry; planned WS4"| MGMT
+    SWANN -.->|"Wazuh agent, encrypted over building internet; planned WS2, requires ASA as true edge"| MGMT
 ```
 
 **Legend.** Blue box = zone with known parameters. Amber dashed box = zone whose security level / ACL state is unverified. Red box = effective over-reach (documented technical debt). Gray box = external. Blue dashed box = planned, not built. Solid arrow = explicit documented permit or built behavior; thick arrow = temporary permit (debt) or NAT; dotted arrow = implicit/by-default, unverified, or planned flow (planned edges are labeled as such).
@@ -65,10 +65,10 @@ flowchart LR
 | Flow | Basis | Type | Status |
 |---|---|---|---|
 | USER → SERVERS (DC01:53) | `USER_IN` permit udp/tcp 53 to 10.10.20.10 | Explicit permit | Permanent |
-| USER → ANY internal | `USER_IN` permit ip 10.10.50.0/24 any | Explicit permit | **Temporary** — ADR-0008, remove end of WS1 |
-| CLIENTS → SERVERS (DC01: AD services) | Domain joins, authentication, and GPO pulls succeed (2026-06-04/08/12 journals), so the path demonstrably functions | Functioning; mechanism unrecorded | **[VERIFY]** — either CLIENTS sec-level > 80 or an unrecorded ACL permits it |
+| USER → ANY internal | `USER_IN` permit ip 10.10.50.0/24 any | Explicit permit | **Temporary**: ADR-0008, remove end of WS1 |
+| CLIENTS → SERVERS (DC01: AD services) | Domain joins, authentication, and GPO pulls succeed (2026-06-04/08/12 journals), so the path demonstrably functions | Functioning; mechanism unrecorded | **[VERIFY]**: either CLIENTS sec-level > 80 or an unrecorded ACL permits it |
 | CLIENTS → DC01 (DHCP) | ASA `dhcprelay` forwards CLIENTS broadcasts to 10.10.20.10 (2026-05-10 journal) | To-the-box relay, not an ACL flow | Built |
-| SERVERS → USER | Implicit security-level (80 → 60) | Default-permit | **[VERIFY]** — no SERVERS ACL recorded |
+| SERVERS → USER | Implicit security-level (80 → 60) | Default-permit | **[VERIFY]**: no SERVERS ACL recorded |
 | All VLANs → Internet | NAT (no inbound; double-NAT) | NAT outbound | Built; ASA not yet true edge |
 | MGMT / CLIENTS inter-zone | Security levels & ACLs not recorded | Unknown | **[VERIFY]** |
 | SERVERS → Internet (Entra sync) | Entra Connect Sync outbound from SRV01, member server not DC | Planned | WS3 |
