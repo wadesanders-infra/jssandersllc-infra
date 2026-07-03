@@ -24,7 +24,7 @@ The project operates in two contexts, and it's honest about what each one provid
 
 **Production** is the business environment. Every system in it exists because the business needs it. Decisions are driven by real constraints: budget, headcount, operational requirements. The user population is small and the Active Directory structure reflects that honestly. The complexity comes from access control logic, investigative capability, and bridging physical and IT security, not from headcount. The value here is judgment, accountability, and operational decision-making.
 
-**Lab** is a cloned copy of the production environment running on physically separate hardware (the primary desktop) with no network path back to production. It exists to validate detection rules and hardening controls before they touch production. The lab carries a deliberately expanded user population (service accounts with SPNs, users with delegated privileges, nested group structures) designed to create the conditions needed for realistic attack simulation. These simulated accounts exist only on the cloned domain controller and never in production AD. The value here is technical depth in offensive and defensive security. The lab is a tool inside the security program, not a standalone project.
+**Lab** is a faithful replica of the production environment running on physically separate hardware (the primary desktop) with no network path back to production. It exists to validate detection rules and hardening controls before they touch production. The lab carries a deliberately expanded user population (service accounts with SPNs, users with delegated privileges, nested group structures) designed to create the conditions needed for realistic attack simulation. These simulated accounts exist only on the replica domain controller and never in production AD. The value here is technical depth in offensive and defensive security. The lab is a tool inside the security program, not a standalone project.
 
 ## Domain
 
@@ -43,7 +43,7 @@ The AD forest root is `ad.jssandersllc.org`, a subdomain of the real owned domai
 | Dell OptiPlex 3050 Micro #2 | DVR integration host at the Swann camera building. Bare metal. 8 GB RAM, 240 GB SSD. Pulls DVR event logs, forwards telemetry to Wazuh, retains footage per policy. |
 | HP Pavilion x360 | Domain-joined field workstation on CLIENTS VLAN. Primary device for Workstream 3 secure access validation on real hardware over external networks. |
 | Dell Latitude E6500 | Domain-joined contractor workstation on CLIENTS VLAN. Configured in contractor OU with restricted GPO and scoped file share access. Runs telemetry generation scripts under contractor credentials. |
-| Primary desktop (i7-12700K, RTX 5070 Ti) | Lab host (cloned production VMs + Kali on isolated internal-only vSwitch), development workstation, documentation, Ollama + Open WebUI. Sits on the USER VLAN for production network access; lab VMs run on a separate internal-only vSwitch with no external uplink. |
+| Primary desktop (i7-12700K, RTX 5070 Ti) | Lab host (replica production VMs + Kali on isolated internal-only vSwitch), development workstation, documentation, Ollama + Open WebUI. Sits on the USER VLAN for production network access; lab VMs run on a separate internal-only vSwitch with no external uplink. |
 
 The ASA is the enforcement layer. The SG350 handles tagging. The OptiPlex is production compute. The Micros are dedicated bare metal hosts for monitoring and DVR integration. The laptops are domain-joined endpoints generating real telemetry. The desktop is lab compute and development. These roles are distinct and shouldn't be confused.
 
@@ -62,7 +62,7 @@ All production VLANs are enforced by ASA ACLs with security levels governing int
 
 ### Lab Network
 
-The lab runs on the primary desktop on an internal-only Hyper-V vSwitch with no external uplink. There is no physical or logical network path between the lab and the production network. This isolation is mandatory because the cloned domain controller carries the same domain name and SIDs as production, and connecting it to the production network would cause AD replication conflicts and SID collisions.
+The lab runs on the primary desktop on an internal-only Hyper-V vSwitch with no external uplink. There is no physical or logical network path between the lab and the production network. The lab is built as a generic replica (same topology and design decisions, its own domain name and fresh SIDs) rather than a clone, so no production identity or data lives outside the production boundary; isolation remains mandatory because the lab hosts attack tooling and simulated compromise (ADR-0011).
 
 ## Virtual Machines
 
@@ -92,11 +92,11 @@ The lab runs on the primary desktop on an internal-only Hyper-V vSwitch with no 
 
 | VM | Role |
 |---|---|
-| DC01-Lab | Cloned domain controller with lab user population |
-| Win10-Lab | Cloned workstation (lateral movement target) |
+| DC01-Lab | Replica domain controller with lab user population |
+| Win10-Lab | Replica workstation (lateral movement target) |
 | Kali | Attack platform |
 
-Lab VMs are cloned from production at the end of Workstream 1 and maintained as a stable baseline. The lab user population (`OU=LabUsers` with 15–20 simulated accounts) is created exclusively on DC01-Lab after cloning.
+Lab VMs are rebuilt to spec from the repo's ADRs, diagrams, and configuration documentation as a generic replica (ADR-0011), and maintained as a stable baseline. The lab user population (`OU=LabUsers` with 15–20 simulated accounts) is created exclusively on DC01-Lab after the replica build.
 
 ## Cloud Footprint
 
@@ -183,15 +183,15 @@ This model is a single reference artifact stored in `onprem/artifacts/`. It info
 
 ## Lab Environment Setup
 
-At the end of this workstream, production VMs are cloned onto the primary desktop to establish the lab environment:
+At the end of this workstream, the lab environment is established on the primary desktop as a generic replica of production (ADR-0011):
 
-- DC01 and one workstation cloned to the desktop's Hyper-V instance
-- Clones connected to an internal-only vSwitch with no external uplink
+- A replica DC and one replica workstation built on the desktop's Hyper-V instance from the repo's ADRs, diagrams, and configuration documentation (own domain name, fresh SIDs, no production data)
+- Replicas connected to an internal-only vSwitch with no external uplink
 - Kali deployed on the same internal-only vSwitch
-- Cloned environment verified functional (AD services, DNS resolution, domain logon)
-- Hyper-V snapshot taken as lab baseline: `Lab: Clean Clone`
+- Replica environment verified functional (AD services, DNS resolution, domain logon)
+- Hyper-V snapshot taken as lab baseline: `Lab: Clean Baseline`
 
-The lab user population (`OU=LabUsers`) is not created at this stage. It is built on the cloned DC at the start of Workstream 4 when attack simulation begins. Production AD contains only real accounts.
+The lab user population (`OU=LabUsers`) is not created at this stage. It is built on the replica DC at the start of Workstream 4 when attack simulation begins. Production AD contains only real accounts.
 
 ## Cross-Project Tool Deployment
 
@@ -214,7 +214,7 @@ Asset criticality ratings justify segmentation decisions, monitoring priorities,
 3. **VLAN design rationale:** segment justification and ACL philosophy
 4. **OU design rationale:** production OU structure reflecting actual business roles and access needs; no lab users in production AD
 5. **Contractor access design:** how external parties receive scoped access to specific file shares, what restrictions are applied, why this approach over alternatives
-6. **Lab isolation on dedicated hardware:** why the lab runs as cloned VMs on the desktop rather than as a VLAN on the production network, covering physical isolation, resource constraints, and SID/replication conflict avoidance
+6. **Lab isolation on dedicated hardware:** why the lab runs as an isolated generic replica on the desktop rather than as a VLAN on the production network or in the cloud, covering capacity, structural isolation, and keeping production identity and data inside the production boundary (recorded as ADR-0011)
 7. **Hardware reallocation and service placement:** why Wazuh moves to dedicated bare metal, why Micro #2 goes to the Swann building for DVR integration rather than serving as backup or spare, and laptop role assignments
 8. **Data classification model:** why a formal classification standard (Public, Internal, Confidential, Restricted) is established before file shares are configured, and how it drives access control decisions across the project
 9. **Tiered administrative access:** why separate admin accounts and Jumpbox-only admin access are enforced even in a two-person environment, covering the principle and the GPO implementation
@@ -232,8 +232,8 @@ Asset criticality ratings justify segmentation decisions, monitoring priorities,
 - [x] File shares with NTFS permissions configured
 - [ ] File share access model verified per role (jsanders verified; contractor01 pending)
 - [ ] Eramba deployed with asset inventory
-- [ ] Production VMs cloned to desktop; lab environment verified functional on internal-only vSwitch
-- [ ] Lab baseline snapshot taken: `Lab: Clean Clone`
+- [ ] Replica lab built on desktop from repo documentation; verified functional on internal-only vSwitch
+- [ ] Lab baseline snapshot taken: `Lab: Clean Baseline`
 - [ ] ADRs committed (domain name, hypervisor, VLAN design, OU design, contractor access, lab isolation, hardware reallocation, data classification, tiered admin)
 - [x] Data classification model documented and referenced by file share permissions
 - [ ] Tiered admin access enforced via GPO (separate admin accounts, Jumpbox-only admin access, deny workstation logon for server admins)
@@ -340,7 +340,7 @@ The lab lives inside this workstream. It's the staging environment where detecti
 
 ## Lab Population Setup
 
-Before attack simulation begins, the cloned DC (DC01-Lab) is populated with the simulated user environment:
+Before attack simulation begins, the replica DC (DC01-Lab) is populated with the simulated user environment:
 
 - `OU=LabUsers` created on DC01-Lab with 15–20 simulated user accounts distributed across roles (IT, Finance, HR, Operations) with varying privilege levels
 - Kerberoastable service accounts with SPNs registered
@@ -373,7 +373,7 @@ This expanded identity layer is a testing construct. It generates the conditions
 
 This work operates entirely on the lab environment running on the primary desktop. It does not touch production systems. The lab has no network path to the production network.
 
-The lab runs cloned production VMs with the expanded user population from `OU=LabUsers`: service accounts with SPNs, users with delegated privileges, nested group structures creating the conditions for realistic attack simulation.
+The lab runs replica production VMs with the expanded user population from `OU=LabUsers`: service accounts with SPNs, users with delegated privileges, nested group structures creating the conditions for realistic attack simulation.
 
 **On-prem attack chain (Kali → DC01-Lab on internal-only vSwitch):** LLMNR/NBT-NS poisoning → hash cracking → AD enumeration (BloodHound) → Kerberoasting → lateral movement → domain compromise. Each step mapped to MITRE ATT&CK technique IDs that carry through into Sigma rules and incident documentation.
 
@@ -406,7 +406,7 @@ Remediate findings from vulnerability assessment and control gaps identified dur
 
 ## Validation
 
-- Re-run attack chains in the lab against the hardened clone to confirm controls break the attack paths
+- Re-run attack chains in the lab against the hardened replica to confirm controls break the attack paths
 - Run the same OpenVAS credentialed scan as the baseline
 - Produce a side-by-side comparison: findings resolved, findings remaining, residual risk accepted with documented justification
 

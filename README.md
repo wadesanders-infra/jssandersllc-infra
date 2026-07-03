@@ -39,7 +39,7 @@ The infrastructure is designed so that a similar event would be detected in near
 
 **Hybrid identity and conditional access** extend these controls to the field. Job sites are where the work happens. Systems that only function on-site don't protect assets that are distributed across sites.
 
-**The lab** exists to validate that all of this actually works. Detections are tested against realistic attack scenarios on physically isolated cloned infrastructure before they touch production. Controls that haven't been tested are assumptions, not controls.
+**The lab** exists to validate that all of this actually works. Detections are tested against realistic attack scenarios on physically isolated replica infrastructure before they touch production. Controls that haven't been tested are assumptions, not controls.
 
 Every architectural decision is documented with rationale. Every workstream produces artifacts that feed the next. The repository documents not just what was built, but why each decision was made and what alternatives were rejected.
 
@@ -55,7 +55,7 @@ Every architectural decision is documented with rationale. Every workstream prod
 | **Monitoring** | No logging, no alerting | Wazuh SIEM/XDR correlating endpoint, network, physical security, and cloud identity telemetry | 🔜 Planned: dedicated hardware staged, not yet deployed |
 | **Field Access** | None; systems only usable on-site | Hybrid identity via Entra Connect Sync, Conditional Access, MFA | 🔜 Planned |
 | **Incident Response** | No ability to detect, investigate, or attribute security events | Alert-driven detection, correlated logs in SIEM, defined response procedures | 🔜 Planned |
-| **Security Testing** | Nothing to test | ATT&CK-mapped attack simulation on physically isolated lab clone, Sigma-based detections promoted to production | 🔜 Planned |
+| **Security Testing** | Nothing to test | ATT&CK-mapped attack simulation on physically isolated lab replica, Sigma-based detections promoted to production | 🔜 Planned |
 | **Vulnerability Mgmt** | No baseline | OpenVAS credentialed scans with measurable pre/post hardening delta | 🔜 Planned |
 | **Governance** | No framework, no evidence | NIST 800-53 controls aligned to real infrastructure with evidence from each implementation phase | 🔜 Planned |
 
@@ -72,7 +72,7 @@ Every architectural decision is documented with rationale. Every workstream prod
 | CLIENTS | 30 | 10.10.30.0/24 | Business workstations |
 | USER | 50 | 10.10.50.0/24 | Development workstation |
 
-**Lab Network (planned):** Cloned production VMs + Kali will run on an internal-only Hyper-V vSwitch on the desktop with no network path to production. The cloned DC will carry the same domain name and SIDs as production; physical isolation is mandatory.
+**Lab Network (planned):** Replica VMs + Kali will run on an internal-only Hyper-V vSwitch on the desktop with no network path to production. The lab is a generic replica rebuilt from this repo's documentation (its own domain name, fresh SIDs), so no production identity or data leaves the production boundary; isolation remains mandatory (ADR-0011).
 
 **Domain:** `ad.jssandersllc.org`, a subdomain of a real owned domain to avoid split-brain DNS, `.local` conflicts, and public CA issues.
 
@@ -82,7 +82,7 @@ Every architectural decision is documented with rationale. Every workstream prod
 
 | # | Workstream | Status |
 |---|---|---|
-| 1 | [Foundation](onprem/journal/): Network, AD, identity, lab clone, cross-project tooling | In progress |
+| 1 | [Foundation](onprem/journal/): Network, AD, identity, lab replica, cross-project tooling | In progress |
 | 2 | [Business Systems](onprem/journal/): Document management, surveillance program | Planned |
 | 3 | [Secure Access](hybrid/journal/): Hybrid identity, Conditional Access, field access | Planned |
 | 4 | Security Program & Governance: Lab population, SIEM, vuln assessment, attack simulation, detection engineering, hardening, validation, NIST 800-53 control alignment | Planned |
@@ -129,7 +129,7 @@ Architectural decisions are documented as ADRs. A few that shape the project:
 - **Hypervisor selection:** why Hyper-V over Proxmox or ESXi given hardware and licensing constraints
 - **VLAN design:** segment justification and ACL philosophy
 - **OU design:** production-only AD structure reflecting actual business roles; no simulated users in production
-- **Lab isolation:** why the lab will run as cloned VMs on dedicated hardware rather than as a VLAN on the production network
+- **Lab isolation:** why the lab runs as an isolated generic replica on dedicated hardware rather than as a VLAN on the production network
 - **Entra Connect placement:** why a member server and not the DC
 
 See [`onprem/decisions/`](onprem/decisions/), [`hybrid/decisions/`](hybrid/decisions/), and [`lab/decisions/`](lab/decisions/) for the full set.
