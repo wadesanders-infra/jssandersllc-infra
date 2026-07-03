@@ -1,56 +1,78 @@
 # Network Topology
 
-**Last updated:** 2026-06-12
+**Last updated:** 2026-07-03
 
-Solid outlines and lines are built; dashed are planned or in flight. Port labels appear only where the physical cabling is documented (2026-05-06 journal): ASA p2 → SW p1 (802.1Q trunk), SW p2 → primary desktop (VLAN 50), SW p3 → Hyper-V host (802.1Q trunk).
+Companion to [`trust-acl-flow.md`](trust-acl-flow.md) (network policy) and [`ou-structure-gpo-summary.md`](ou-structure-gpo-summary.md) (identity). This diagram shows what is physically *connected*: devices, ports, and trunks. Port labels appear only where the physical cabling is documented (2026-05-06 journal): ASA p2 to SW p1 (802.1Q trunk), SW p2 to primary desktop (VLAN 50), SW p3 to Hyper-V host (802.1Q trunk). Switch ports marked **[VERIFY]** are cabled and working but never recorded; they resolve in step 1.7 of the [WS1 verification runbook](../../SOPs/ws1-verification-runbook.md).
 
 ```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 60, "rankSpacing": 70}}}%%
 flowchart TB
-    classDef planned stroke-dasharray: 5 5
+    classDef zone fill:#e8f0fe,stroke:#3367d6,color:#111111
+    classDef unver fill:#fef7e0,stroke:#f9ab00,stroke-dasharray:4 3,color:#111111
+    classDef outside fill:#f1f3f4,stroke:#80868b,color:#111111
+    classDef planned fill:#e8f0fe,stroke:#3367d6,stroke-dasharray:5 5,color:#111111
 
-    INET(["Internet via upstream home network<br/>double-NAT; ASA not yet true edge"])
-    ASA["Cisco ASA 5506-X<br/>perimeter firewall, inter-VLAN router, NAT"]
-    SW["Cisco SG350-10<br/>L2 802.1Q VLAN tagging"]
+    INET(["Internet via upstream home network<br/>double-NAT; ASA not yet true edge"]):::outside
+    ASA["Cisco ASA 5506-X<br/>perimeter firewall, inter-VLAN router, NAT"]:::zone
+    SW["Cisco SG350-10<br/>L2 802.1Q VLAN tagging"]:::zone
 
     INET --- ASA
     ASA ---|"ASA p2 to SW p1, 802.1Q trunk"| SW
 
     subgraph HV["Dell OptiPlex 9020 - production Hyper-V host"]
-        DC01["DC01 - AD DS, DNS, DHCP<br/>SERVERS, VLAN 20"]
-        SRV01["SRV01 - member server, file shares<br/>SERVERS, VLAN 20"]
-        JUMP["Jumpbox - admin workstation<br/>MGMT, VLAN 10 - planned"]
+        DC01["DC01 - AD DS, DNS, DHCP<br/>SERVERS, VLAN 20"]:::zone
+        SRV01["SRV01 - member server, file shares<br/>SERVERS, VLAN 20"]:::zone
+        JUMP["Jumpbox - admin workstation<br/>MGMT, VLAN 10 - planned"]:::planned
     end
 
     subgraph DESK["Primary desktop - USER VLAN 50 - not domain-joined, ADR-0009"]
-        subgraph LAB["Lab - internal-only vSwitch, no uplink - planned, WS4"]
-            DCL["DC01-Lab"]
-            W10["Win10-Lab"]
-            KALI["Kali"]
+        subgraph LAB["Lab - replica VMs, internal-only vSwitch, no uplink - planned WS4, ADR-0011"]
+            DCL["DC01-Lab (replica)"]:::planned
+            W10["Win10-Lab (replica)"]:::planned
+            KALI["Kali"]:::planned
         end
     end
 
-    WAZ["Micro #1 - Wazuh SIEM/XDR<br/>MGMT, VLAN 10 - staged, not deployed"]
-    PAV["JSS-WS01 - HP Pavilion x360, field workstation<br/>CLIENTS, VLAN 30"]
-    LAT["JSS-WS02 - Dell Latitude E6500, contractor workstation<br/>CLIENTS, VLAN 30"]
+    WAZ["Micro #1 - Wazuh SIEM/XDR<br/>MGMT, VLAN 10 - staged, not deployed"]:::planned
+    PAV["JSS-WS01 - HP Pavilion x360, field workstation<br/>CLIENTS, VLAN 30"]:::zone
+    LAT["JSS-WS02 - Dell Latitude E6500, contractor workstation<br/>CLIENTS, VLAN 30"]:::zone
 
     SW ---|"SW p3, 802.1Q trunk"| HV
     SW ---|"SW p2, VLAN 50"| DESK
-    SW -.- WAZ
-    SW --- PAV
-    SW --- LAT
+    SW -.-|"port [VERIFY]"| WAZ
+    SW ---|"port [VERIFY]"| PAV
+    SW ---|"port [VERIFY]"| LAT
 
-    subgraph SWANN["Swann camera building - remote site - planned, WS2"]
-        DVR["Swann DVR"]
-        M2["Micro #2 - DVR integration host"]
+    subgraph SWANN["Swann camera building - remote site - planned WS2"]
+        DVR["Swann DVR"]:::planned
+        M2["Micro #2 - DVR integration host"]:::planned
         DVR --- M2
     end
-    M2 -.->|"Wazuh agent, encrypted, over building internet"| WAZ
 
-    ENTRA(["Entra ID tenant - planned, WS3"])
+    ENTRA(["Entra ID tenant - planned WS3"]):::planned
+    M2 -.->|"Wazuh agent, encrypted"| WAZ
     SRV01 -.->|"Entra Connect Sync"| ENTRA
-
-    class JUMP,LAB,DCL,W10,KALI,WAZ,M2,DVR,SWANN,ENTRA planned
 ```
+
+**Legend.** Blue box = built and documented. Blue dashed box = planned or staged, not deployed. Gray box = external. Solid line = documented physical link; dotted line = planned link or undocumented port. Port labels appear only where cabling is recorded.
+
+## Elements
+
+| Element | Role | Network | Status | Source |
+|---|---|---|---|---|
+| Cisco ASA 5506-X | Perimeter firewall, inter-VLAN router, NAT | All VLANs (router-on-a-stick) | Built | 2026-05-06 journal |
+| Cisco SG350-10 | L2 802.1Q tagging only | Trunk to ASA (p1) | Built | 2026-05-06 journal |
+| Dell OptiPlex 9020 | Production Hyper-V host | SW p3, 802.1Q trunk | Built | 2026-05-29, 2026-06-03 journals |
+| DC01 (VM) | AD DS, DNS, DHCP | SERVERS, 10.10.20.10 | Built; renamed to DC01 2026-06-11 | 2026-06-08/11 journals |
+| SRV01 (VM) | Member server, file shares | SERVERS, 10.10.20.20 | Built | 2026-06-04 journal |
+| Jumpbox (VM) | Admin workstation for tiered admin | MGMT | Planned | outline WS1 |
+| Primary desktop (i7-12700K) | Development workstation; future lab host; never domain-joined | USER, SW p2 | Built | ADR-0009 |
+| Lab (replica VMs + Kali) | Detection and attack validation | Internal-only vSwitch, no uplink | Planned WS4; generic replica | ADR-0011 |
+| Micro #1 | Bare-metal Wazuh SIEM/XDR | MGMT; SW port **[VERIFY]** | Staged, not deployed (needs RAM/SSD) | ADR-0012 |
+| JSS-WS01 (HP Pavilion x360) | Field workstation | CLIENTS; SW port **[VERIFY]** | Built, domain-joined | 2026-06-12 journal |
+| JSS-WS02 (Dell Latitude E6500) | Contractor workstation | CLIENTS; SW port **[VERIFY]** | Built, domain-joined | 2026-06-12 journal |
+| Swann DVR + Micro #2 | Surveillance and DVR integration host | Remote building, own internet | Planned WS2 | ADR-0012 |
+| Entra ID tenant | Hybrid identity | Cloud | Planned WS3 | outline WS3 |
 
 ## VLANs
 
@@ -65,4 +87,7 @@ flowchart TB
 
 - The ASA performs all inter-VLAN routing and ACL enforcement via 802.1Q subinterfaces on the trunk to the SG350 (router-on-a-stick). The switch does L2 tagging only.
 - The network currently double-NATs through the upstream home network, so the ASA is not yet the true edge. This must be resolved before Workstream 3 remote access work (2026-05-06 journal).
-- The USER VLAN is running a temporarily permissive ACL during buildout, to be re-restricted at the end of Workstream 1 (ADR-0008).
+- The USER VLAN is running a temporarily permissive ACL during buildout, to be re-restricted at the end of Workstream 1 (ADR-0008); the policy detail lives in the trust and ACL flow companion.
+- The lab is a generic replica built from this repo's documentation (own domain name, fresh SIDs), not a clone of production (ADR-0011).
+- Switch port assignments for Micro #1 and the two workstations were never recorded; they carry **[VERIFY]** until confirmed via step 1.7 of the [WS1 verification runbook](../../SOPs/ws1-verification-runbook.md) (`show mac address-table` on the SG350, or physical trace), then get recorded here in the same commit.
+- **Source of truth** is the physical cabling and device configurations; this diagram explains intent and recorded state.

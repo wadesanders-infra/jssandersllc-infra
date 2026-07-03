@@ -25,6 +25,7 @@ Every **[VERIFY]** marker in `onprem/artifacts/asa-acl-ruleset.md` and `onprem/d
 | 1.4 | `show running-config access-group` | Which interfaces have ACLs applied, and direction | Confirms whether MGMT/SERVERS/CLIENTS run on implicit security-level policy |
 | 1.5 | `show running-config dhcprelay` | DHCP relay configuration | Relay to 10.10.20.10 on CLIENTS |
 | 1.6 | `show running-config nat` | NAT rules serving outbound internet | Outbound NAT for production VLANs; no inbound statics |
+| 1.7 | On the SG350: `show mac address-table` | Switch ports for Micro #1, JSS-WS01, JSS-WS02 (topology diagram **[VERIFY]** items) | Each device's port recorded in `network-topology.md` |
 
 Record each actual result in the results table below before moving on.
 
@@ -51,7 +52,14 @@ On DC01:
 ```
 Get-ADComputer JSS-WS01 | Select-Object DistinguishedName
 Get-ADComputer JSS-WS02 | Select-Object DistinguishedName
+Get-ADComputer SRV01 | Select-Object DistinguishedName
+Get-ADOrganizationalUnit -Filter * | Select-Object DistinguishedName
+Get-ADGroupMember "SG-Contractor-Projects"
+Get-GPO -All | Select-Object DisplayName
+Get-GPO -All | ForEach-Object { Get-GPOReport $_.Id -ReportType Xml } | Select-String "<LinksTo>" -Context 0,2
 ```
+
+The extra commands resolve the [VERIFY] items in `onprem/diagrams/ou-structure-gpo-summary.md`: SRV01's OU placement, the full OU inventory (including whether SyncUsers exists), Service Accounts membership, and the actual GPO names and link targets.
 
 Expected: hostnames match the convention; domain reads `ad.jssandersllc.org`; JSS-WS01 sits in JSS > Workstations, JSS-WS02 in JSS > Workstations > Contractor-Workstations; applied GPOs match each OU. (The contractor restricted GPO is not built yet; its absence on JSS-WS02 is expected, not a finding.)
 
