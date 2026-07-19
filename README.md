@@ -4,14 +4,14 @@ J.S. Sanders LLC is a land development company operating across active job sites
 
 Despite the business's scale and exposure, it had no formal IT infrastructure. No network segmentation, no centralized identity, no document management, no logging, and no security program.
 
-> **Where the project stands:** Workstream 1 (network, identity, endpoints) is largely built, with verification in progress. Workstreams 2–4 (business systems, secure access, security program) are designed and sequenced but not yet built. Status is marked throughout this README; anything labeled *Planned* is a design target, not a finished system.
+> **Where the project stands (2026-07-19): this era is closed.** Workstream 1 (network, identity, endpoints) was built, then verified against the running configuration in a single evidence session on 2026-07-18. That session produced seven findings, documented rather than hidden; two of them were controls that existed on paper but had never taken effect, which is exactly what verification exists to catch. I am leaving the company, and no one remains to operate or extend the environment, so the production program ends here, proven rather than abandoned midstream (ADR-0014). Workstreams 2 through 4 were designed but never built; each is visibly retired or carried forward in [outline.md](outline.md). The repository continues as the flagship for a successor project on the same hardware: a clearly fictional synthetic healthcare enterprise range (Genetix Health Group) built for detection engineering and identity security work. The tag `production-era-final` marks the production era's last state.
 
 **Reviewing this repo?** Start with these four artifacts; they are representative of how the whole project is documented:
 
-- [Network topology diagram](onprem/diagrams/network-topology.md): the current build state, rendered, with built versus planned marked
-- [Workstation build and domain-join SOP](SOPs/workstation-domain-join-sop.md): a repeatable endpoint procedure written after a real process gap caused a real mistake
-- [Journal: workstation naming and placement](onprem/journal/2026-06-12-workstation-naming-placement.md): root-cause analysis of that gap, the fix, and the standard that came out of it
-- [ADR-0008: temporary permissive USER VLAN rule](onprem/decisions/ADR-0008-permissive-user-vlan-rule.md): how risk acceptance and technical debt are documented here, with a defined payoff trigger instead of a vague "later"
+- [WS1 verification runbook, executed](SOPs/ws1-verification-runbook.md): the evidence session that closed the era, with the results table filled and every claim checked against the running config
+- [Journal: verification runbook execution](onprem/journal/2026-07-18-ws1-verification-runbook-execution.md): the seven findings and what they taught, including the password policy that was linked everywhere and effective nowhere
+- [ADR-0014: end the production era](onprem/decisions/ADR-0014-end-production-era-continue-as-synthetic-range.md): how the era ends, what it proved, and why the repo continues as a synthetic range
+- [ADR-0008: temporary permissive USER VLAN rule](onprem/decisions/ADR-0008-permissive-user-vlan-rule.md): a complete technical-debt lifecycle: accepted with a defined trigger, corrected in place when its blast radius was understated, amended at close when the trigger changed
 
 ## What Triggered This Project
 
@@ -23,11 +23,11 @@ This was not the only incident. Other scouting attempts at active sites reinforc
 
 Despite a small user population (two permanent employees plus scoped contractor accounts), the business operates across active job sites with high-value physical assets and has already experienced theft. This project treats the environment as **high-risk, low-maturity**, not low-risk, and prioritizes controls accordingly.
 
-## What This Project Builds
+## What This Project Built
 
 Everything in this repository exists because that failure happened.
 
-The infrastructure is designed so that a similar event would be detected in near real-time, logged across relevant systems, investigable after the fact, and attributable to a specific identity or access path. The descriptions below are the design intent for the full program; the status table that follows shows what is built versus planned.
+The infrastructure was designed so that a similar event would be detected in near real-time, logged across relevant systems, investigable after the fact, and attributable to a specific identity or access path. Workstream 1 (the network, identity, and endpoint foundation) was built and verified; the rest of the program below stands as the design record, retired or carried forward per ADR-0014 when the era closed. The status table shows the honest final state of each area.
 
 **Surveillance** is not cameras that happen to be recording. It's a retained evidence system with access controls, audit logging, tuned alerts, and event data feeding a centralized SIEM. When something happens, there is footage to review, a record of who accessed it, and a timeline to reconstruct.
 
@@ -45,19 +45,19 @@ Every architectural decision is documented with rationale. Every workstream prod
 
 ## Before → Target State
 
-| Area | Before | Target | Status |
+| Area | Before | Target | Final Status (2026-07-18) |
 |---|---|---|---|
-| **Network** | Flat topology, no segmentation | Four production VLANs enforced by Cisco ASA ACLs | ✅ Built: temporary permissive USER VLAN rule during buildout (ADR-0008) |
-| **Identity** | No centralized accounts or access control | Active Directory with OU structure, GPOs, RBAC, and scoped contractor access | ✅ Built: core verified; contractor-scope verification continuing |
-| **Endpoints** | Unmanaged personal devices | Domain-joined, GPO-managed Windows endpoints | 🔄 In progress: workstations joined, named, and OU-placed per SOP; contractor GPO pending |
-| **Documents** | Paper in filing cabinets, not searchable, not field-accessible | Self-hosted DMS with OCR, full-text search, and AD-integrated access controls | 🔜 Planned |
-| **Surveillance** | Cameras recording autonomously with no retention policy, no access controls, no audit trail | Retained evidence system with role-based access, tuned alerts, and logs feeding SIEM | 🔜 Planned |
-| **Monitoring** | No logging, no alerting | Wazuh SIEM/XDR correlating endpoint, network, physical security, and cloud identity telemetry | 🔜 Planned: dedicated hardware staged, not yet deployed |
-| **Field Access** | None; systems only usable on-site | Hybrid identity via Entra Connect Sync, Conditional Access, MFA | 🔜 Planned |
-| **Incident Response** | No ability to detect, investigate, or attribute security events | Alert-driven detection, correlated logs in SIEM, defined response procedures | 🔜 Planned |
-| **Security Testing** | Nothing to test | ATT&CK-mapped attack simulation on physically isolated lab replica, Sigma-based detections promoted to production | 🔜 Planned |
-| **Vulnerability Mgmt** | No baseline | OpenVAS credentialed scans with measurable pre/post hardening delta | 🔜 Planned |
-| **Governance** | No framework, no evidence | NIST 800-53 controls aligned to real infrastructure with evidence from each implementation phase | 🔜 Planned |
+| **Network** | Flat topology, no segmentation | Four production VLANs enforced by Cisco ASA ACLs | ✅ Built and verified. Two temporary broad permits recorded as debt: USER (ADR-0008) and an undocumented CLIENTS mirror found during verification (F1) |
+| **Identity** | No centralized accounts or access control | Active Directory with OU structure, GPOs, RBAC, and scoped contractor access | ✅ Built and verified, with findings owned honestly: the hardened password policy was shadowed by link order (F4) and the contractor group held no NTFS grant (F5) |
+| **Endpoints** | Unmanaged personal devices | Domain-joined, GPO-managed Windows endpoints | ✅ Built and verified: joined, named, OU-placed per SOP; the contractor restriction GPO was never built and is retired (ADR-0014, design in ADR-0007) |
+| **Documents** | Paper in filing cabinets, not searchable, not field-accessible | Self-hosted DMS with OCR, full-text search, and AD-integrated access controls | Retired unbuilt (ADR-0014) |
+| **Surveillance** | Cameras recording autonomously with no retention policy, no access controls, no audit trail | Retained evidence system with role-based access, tuned alerts, and logs feeding SIEM | Retired unbuilt (ADR-0014); the founding problem stays unsolved, and the ADR owns that |
+| **Monitoring** | No logging, no alerting | Wazuh SIEM/XDR correlating endpoint, network, and identity telemetry | Carried forward: Wazuh deploys on the same staged hardware in the successor project |
+| **Field Access** | None; systems only usable on-site | Hybrid identity via Entra Connect Sync, Conditional Access, MFA | Retired unbuilt (ADR-0014); Entra work deferred to the successor's later phases |
+| **Incident Response** | No ability to detect, investigate, or attribute security events | Alert-driven detection, correlated logs in SIEM, defined response procedures | Carried forward: becomes core scenario work in the successor range |
+| **Security Testing** | Nothing to test | ATT&CK-mapped attack simulation on isolated replica, Sigma-based detections | Carried forward: the successor range replaces the replica entirely (ADR-0011 superseded) |
+| **Vulnerability Mgmt** | No baseline | OpenVAS credentialed scans with measurable pre/post hardening delta | Carried forward to the successor's scale-out phase |
+| **Governance** | No framework, no evidence | NIST 800-53 controls aligned to real infrastructure with evidence per phase | Carried forward, registers-first, in the successor project |
 
 ## Architecture
 
@@ -67,27 +67,27 @@ Every architectural decision is documented with rationale. Every workstream prod
 
 | VLAN | ID | Subnet | Purpose |
 |---|---|---|---|
-| MGMT | 10 | 10.10.10.0/24 | Infrastructure management; monitoring host (planned) |
-| SERVERS | 20 | 10.10.20.0/24 | Domain controller, member server; document and video management (planned) |
+| MGMT | 10 | 10.10.10.0/24 | Infrastructure management |
+| SERVERS | 20 | 10.10.20.0/24 | Domain controller, member server |
 | CLIENTS | 30 | 10.10.30.0/24 | Business workstations |
 | USER | 50 | 10.10.50.0/24 | Development workstation |
 
-**Lab Network (planned):** Replica VMs + Kali will run on an internal-only Hyper-V vSwitch on the desktop with no network path to production. The lab is a generic replica rebuilt from this repo's documentation (its own domain name, fresh SIDs), so no production identity or data leaves the production boundary; isolation remains mandatory (ADR-0011).
+**Lab Network:** The planned replica lab (ADR-0011) was never built and is superseded: the successor project turns the whole flagship into a synthetic range, which makes a separate replica redundant (ADR-0014). The rebuild-from-documentation test the replica was meant to provide transfers to the successor's scripted deployment.
 
 **Domain:** `ad.jssandersllc.org`, a subdomain of a real owned domain to avoid split-brain DNS, `.local` conflicts, and public CA issues.
 
-**Cloud (planned, Workstream 3):** A free Entra ID tenant will be linked via Entra Connect Sync on a member server (not the DC). Sync will be scoped to `OU=SyncUsers`, with a cloud-only Global Admin with MFA as break-glass.
+**Cloud:** The planned Entra ID integration (Connect Sync on a member server, scoped to `OU=SyncUsers`) was never built; the design carries to the successor project's later phases. The `SyncUsers` OU and `svc-entraconnect` account exist and were verified 2026-07-18.
 
 ## Workstreams
 
-| # | Workstream | Status |
+| # | Workstream | Final Status |
 |---|---|---|
-| 1 | [Foundation](onprem/journal/): Network, AD, identity, lab replica, cross-project tooling | In progress |
-| 2 | [Business Systems](onprem/journal/): Document management, surveillance program | Planned |
-| 3 | [Secure Access](hybrid/journal/): Hybrid identity, Conditional Access, field access | Planned |
-| 4 | Security Program & Governance: Lab population, SIEM, vuln assessment, attack simulation, detection engineering, hardening, validation, NIST 800-53 control alignment | Planned |
+| 1 | [Foundation](onprem/journal/): Network, AD, identity, endpoints | ✅ Built and verified; closed 2026-07-18 with exit criteria re-baselined in [outline.md](outline.md) |
+| 2 | [Business Systems](onprem/journal/): Document management, surveillance program | Retired unbuilt (ADR-0014) |
+| 3 | [Secure Access](hybrid/journal/): Hybrid identity, Conditional Access, field access | Retired unbuilt; design carries to the successor's later phases |
+| 4 | Security Program & Governance: SIEM, attack simulation, detection engineering, hardening, NIST 800-53 alignment | Carried forward: this is what the successor range exists to do |
 
-Governance threads throughout. Eramba deploys in Workstream 1 and accumulates control mappings incrementally so the control alignment is finished at the end of Workstream 4, not started from scratch.
+Eramba was planned for Workstream 1 and never deployed; the successor project runs plain-file governance registers first and treats a GRC tool as optional tooling on top, not the system of record.
 
 ## How This Repo Is Organized
 
@@ -129,7 +129,8 @@ Architectural decisions are documented as ADRs. A few that shape the project:
 - **Hypervisor selection:** why Hyper-V over Proxmox or ESXi given hardware and licensing constraints
 - **VLAN design:** segment justification and ACL philosophy
 - **OU design:** production-only AD structure reflecting actual business roles; no simulated users in production
-- **Lab isolation:** why the lab runs as an isolated generic replica on dedicated hardware rather than as a VLAN on the production network
+- **Lab isolation:** why the lab was designed as an isolated generic replica on dedicated hardware (superseded at era close by ADR-0014)
 - **Entra Connect placement:** why a member server and not the DC
+- **End of the production era:** why the program closed verified rather than continuing without an operator, and what the repository becomes next (ADR-0014)
 
 See [`onprem/decisions/`](onprem/decisions/), [`hybrid/decisions/`](hybrid/decisions/), and [`lab/decisions/`](lab/decisions/) for the full set.
