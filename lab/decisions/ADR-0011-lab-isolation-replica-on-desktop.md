@@ -1,7 +1,7 @@
 # ADR-0011: Run the Lab as an Isolated Replica on the Dedicated Desktop, Not on the Production Network or in the Cloud
 
 **Date:** 2026-07-01
-**Status:** Accepted
+**Status:** Superseded by ADR-0014
 **Workstream:** 1
 
 ## Context
@@ -35,4 +35,4 @@ The lab runs on the primary desktop as a generic replica of production, on an in
 - The replica replaces the clone plan. Lab fidelity now comes from rebuilding to spec from the ADRs, diagrams, and journals rather than from copying VMs. This doubles as a test of the documentation itself: if the replica cannot be rebuilt from the repo, the repo is incomplete.
 - Drift is the accepted trade-off. A clone tracks production automatically; a replica only tracks it as well as the documentation does. Any future production change must be reflected in the docs for the replica to stay faithful.
 - Follow-up: the README and outline still describe the lab as cloned production VMs with the same domain and SIDs, and the Workstream 1 exit criterion reads "Production VMs cloned to desktop." Both need updating to replica language to match this decision.
-- The desktop remains permanently off the production domain per ADR-0009; this ADR depends on and reinforces that one.
+- The desktop remains permanently off the production domain per ADR-0009; this ADR depends on and reinforc
