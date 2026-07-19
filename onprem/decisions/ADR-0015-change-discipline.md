@@ -1,8 +1,10 @@
-# ADR-0014: Adopt Risk-Tiered Change Discipline and a Standing Risk Register
+# ADR-0015: Adopt Risk-Tiered Change Discipline and a Standing Risk Register
 
 **Date:** 2026-07-08
 **Status:** Accepted
 **Workstream:** All (adopted during WS1 close-out)
+
+*(Renumbered from ADR-0014 on 2026-07-19. This ADR was committed to the remote only and never pulled locally; the era-close decision was numbered ADR-0014 against the local view, committed, and tagged before the collision surfaced during the close-out push. Globally sequential numbering resolves in favor of the tagged commit, so this ADR takes 0015.)*
 
 
 
