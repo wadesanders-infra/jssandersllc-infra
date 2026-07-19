@@ -95,6 +95,7 @@ Eramba was planned for Workstream 1 and never deployed; the successor project ru
 jssandersllc-infra/
 ├── README.md
 ├── outline.md                  ← Full project plan with scope and rationale
+├── risk-register.md            ← Live register of consciously carried risk (ADR-0014)
 ├── onprem/
 │   ├── journal/                ← Session-based lab notebook entries
 │   ├── decisions/              ← Architecture Decision Records (ADRs)
@@ -121,6 +122,8 @@ jssandersllc-infra/
 
 **SOPs** codify repeatable procedures after a process gap causes a real mistake. Each one encodes the corrected workflow; the first covers workstation naming, domain join, OU placement, and verification.
 
+**The risk register** (`risk-register.md`) is the live view of consciously carried risk. Every open row is a deliberate acceptance with a named exit trigger, checked at the start of each working session; closed rows keep their history rather than being deleted (ADR-0015).
+
 ## Key Decisions
 
 Architectural decisions are documented as ADRs. A few that shape the project:
@@ -131,6 +134,7 @@ Architectural decisions are documented as ADRs. A few that shape the project:
 - **OU design:** production-only AD structure reflecting actual business roles; no simulated users in production
 - **Lab isolation:** why the lab was designed as an isolated generic replica on dedicated hardware (superseded at era close by ADR-0014)
 - **Entra Connect placement:** why a member server and not the DC
+- **Change discipline:** risk-tiered change control with a standing risk register, adopted after two documented change-class failures (ADR-0015)
 - **End of the production era:** why the program closed verified rather than continuing without an operator, and what the repository becomes next (ADR-0014)
 
 See [`onprem/decisions/`](onprem/decisions/), [`hybrid/decisions/`](hybrid/decisions/), and [`lab/decisions/`](lab/decisions/) for the full set.

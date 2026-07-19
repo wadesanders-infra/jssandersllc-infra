@@ -127,6 +127,8 @@ A few things are deployed early and maintained across the entire project rather 
 
 **Snapshot discipline.** Hyper-V snapshots are taken at each workstream boundary with consistent naming. Before starting, estimate snapshot sizes per VM and verify available disk on the OptiPlex. Certain snapshots are permanent anchors (clean build, vulnerable baseline, hardened state). Running out of disk mid-project is avoidable, so plan for it.
 
+**Change discipline.** Adopted during Workstream 1 close-out and applied from there on (ADR-0015). Standard changes are pre-approved and journaled; normal-tier changes (GPO, AD, DNS, DHCP, ASA, Wazuh, hypervisor networking) require written blast radius, rollback, and verification plus an adversarial review before execution; every accepted risk carries a named exit trigger in `risk-register.md`, checked at the start of each session. Change types graduate to the pre-approved list after two clean runs, so friction decays as the environment stabilizes.
+
 -----
 
 # Workstream 1: Foundation
