@@ -221,28 +221,28 @@ Asset criticality ratings justify segmentation decisions, monitoring priorities,
 
 ## Exit Criteria
 
-- [ ] All production VMs deployed and domain-joined
-- [ ] Micro #1 provisioned as bare metal Wazuh host on MGMT VLAN
-- [ ] Micro #2 provisioned at Swann building with network connectivity to DVR
+- [ ] All production VMs deployed and domain-joined *(closes with the era per ADR-0014; the outstanding VM was the jumpbox [CONFIRM: nothing else was planned], which carries to the new-era build)*
+- [ ] Micro #1 provisioned as bare metal Wazuh host on MGMT VLAN *(carried forward per ADR-0014; Wazuh still deploys on Micro #1 in the new era)*
+- [ ] Micro #2 provisioned at Swann building with network connectivity to DVR *(retired per ADR-0014; DVR integration ends with the production era)*
 - [x] Laptops domain-joined on CLIENTS VLAN as JSS-WS01 (field) and JSS-WS02 (contractor), named and OU-placed per the workstation SOP
-- [ ] Contractor workstation restricted GPO built and linked to the Contractor-Workstations OU (OU placement done; GPO build pending)
+- [ ] Contractor workstation restricted GPO built and linked to the Contractor-Workstations OU (OU placement done; GPO build pending) *(retired per ADR-0014; the design case remains in ADR-0007, and the endpoint becomes the new era's Linux contractor machine)*
 - [x] Production OU structure with two real user accounts and appropriate permissions
 - [x] Contractor access mechanism configured with scoped permissions
 - [x] GPOs enforcing password policy and audit logging
 - [x] File shares with NTFS permissions configured
-- [ ] File share access model verified per role (jsanders verified; contractor01 pending)
-- [ ] Eramba deployed with asset inventory
-- [ ] Replica lab built on desktop from repo documentation; verified functional on internal-only vSwitch
-- [ ] Lab baseline snapshot taken: `Lab: Clean Baseline`
-- [ ] ADRs committed (domain name, hypervisor, VLAN design, OU design, contractor access, lab isolation, hardware reallocation, data classification, tiered admin)
+- [x] File share access model verified per role (jsanders verified 2026-06-08; contractor01 verified 2026-07-18: Public allowed, Internal/Confidential/Restricted denied) *(the intended scoped contractor grant was never implemented: finding F5, 2026-07-18 journal)*
+- [ ] Eramba deployed with asset inventory *(retired from WS1 per ADR-0014; the new era runs plain-file governance registers first, Eramba optional later)*
+- [ ] Replica lab built on desktop from repo documentation; verified functional on internal-only vSwitch *(retired per ADR-0014; ADR-0011 superseded, the range replaces the replica)*
+- [ ] Lab baseline snapshot taken: `Lab: Clean Baseline` *(retired with the replica per ADR-0014)*
+- [ ] ADRs committed (domain name, hypervisor, VLAN design, OU design, contractor access, lab isolation, hardware reallocation, data classification, tiered admin) *(all committed except tiered admin, which carries to the new-era ADR batch per ADR-0014)*
 - [x] Data classification model documented and referenced by file share permissions
-- [ ] Tiered admin access enforced via GPO (separate admin accounts, Jumpbox-only admin access, deny workstation logon for server admins)
-- [ ] USER VLAN broad permit removed; least-privilege ACLs reinstated (ADR-0008)
-- [ ] Time synchronization verified across domain-joined systems, ASA, and DVR
-- [ ] Eramba asset inventory includes criticality ratings, RTO, and business dependency per asset
+- [ ] Tiered admin access enforced via GPO (separate admin accounts, Jumpbox-only admin access, deny workstation logon for server admins) *(carried forward to the new-era tier model per ADR-0014)*
+- [ ] USER VLAN broad permit removed; least-privilege ACLs reinstated (ADR-0008) *(superseded form per amended ADR-0008: the permit comes out with the new era's full ACL rebuild)*
+- [ ] Time synchronization verified across domain-joined systems, ASA, and DVR *(domain hosts verified 2026-07-18: DC01 external stratum 2, members on DC01; the ASA has no NTP configured (finding F7) and the switch clock is unset (F6), so the criterion as written cannot close; DVR leg retired per ADR-0014)*
+- [ ] Eramba asset inventory includes criticality ratings, RTO, and business dependency per asset *(retired with the Eramba item per ADR-0014)*
 - [x] Skeleton README committed
 - [x] First journal entry committed
-- [ ] Hyper-V snapshot: `WS1: Clean Build` (production, on OptiPlex)
+- [ ] Hyper-V snapshot: `WS1: Clean Build` (production, on OptiPlex) *(retired per ADR-0014; replaced by an export and decommission record when the era's VMs come down)*
 
 ## Deliverables
 

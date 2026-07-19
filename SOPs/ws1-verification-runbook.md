@@ -1,6 +1,7 @@
 # WS1 Verification Runbook: Network Policy, Identity, and Time
 
 **Type:** Runbook (read-only verification session)
+**Executed:** 2026-07-18, all phases, one sitting. Results below; findings and narrative in the 2026-07-18 journal.
 **Estimated time:** 60 to 90 minutes on-site
 **Re-run trigger:** After any ACL, interface, or share permission change; before closing Workstream 1
 **Access required:** ASA console or SSH (enable mode), admin logon to DC01 and SRV01, local access to JSS-WS01 and JSS-WS02
@@ -104,19 +105,21 @@ Expected: dcdiag passes under the DC01 name, all five FSMO roles present, SRV re
 
 ## Results Table
 
+Filled 2026-07-18.
+
 | Step | Expected | Actual | Pass/Fail | Doc to update |
 |---|---|---|---|---|
-| 1.1 | | | | asa-acl-ruleset.md, trust-acl-flow.md |
-| 1.2 | | | | asa-acl-ruleset.md |
-| 1.3 | | | | asa-acl-ruleset.md, trust-acl-flow.md |
-| 1.4 | | | | asa-acl-ruleset.md, trust-acl-flow.md |
-| 1.5 | | | | asa-acl-ruleset.md |
-| 1.6 | | | | asa-acl-ruleset.md |
-| 2 | | | | trust-acl-flow.md (CLIENTS edge loses [VERIFY]) |
-| 3 | | | | outline exit criteria |
-| 4 | | | | outline exit criteria (contractor verification) |
-| 5 | | | | outline exit criteria (time sync) |
-| 6 | | | | journal only |
+| 1.1 | OUTSIDE 0, USER 60, SERVERS 80 confirmed; MGMT and CLIENTS recorded | outside 0, MGMT 90, SERVERS 80, CLIENTS 70, USER 60 | Pass; two new facts recorded | asa-acl-ruleset.md, trust-acl-flow.md |
+| 1.2 | Subinterfaces match VLANs 10/20/30/50 | G1/2.10/.20/.30/.50 map to VLANs 10/20/30/50, gateways x.1/24; all other ports shutdown | Pass | asa-acl-ruleset.md |
+| 1.3 | USER_IN with three known entries; anything else a finding | USER_IN exactly as documented; CLIENTS_IN found, undocumented: DNS to DC01 plus permit ip 10.10.30.0/24 any | **Finding F1** | asa-acl-ruleset.md, trust-acl-flow.md |
+| 1.4 | Confirm which interfaces run implicit policy | ACLs only on CLIENTS and USER; MGMT and SERVERS implicit | Pass | asa-acl-ruleset.md, trust-acl-flow.md |
+| 1.5 | Relay to 10.10.20.10 on CLIENTS | Confirmed; relay also enabled on USER (previously unrecorded), timeout 60 | Pass; new fact | asa-acl-ruleset.md |
+| 1.6 | Outbound NAT, no inbound statics | Four object-network dynamic PATs, no statics | Pass | asa-acl-ruleset.md |
+| 2 | Mechanism behind CLIENTS to SERVERS | Explicit: CLIENTS_IN broad permit (F1); security levels alone would deny 70 to 80 | Resolved via finding | trust-acl-flow.md |
+| 3 | Hostnames, domain, OU placements, applied GPOs match docs | All matched; contractor GPO absent as expected; GPO inventory surfaced F4 (password policy shadowed, no lockout) and F8 (assumed lifecycle GPO nonexistent) | Pass with findings | outline exit criteria, ou-structure-gpo-summary.md |
+| 4 | Contractor01: project share allowed, Internal/Confidential/Restricted denied | No project share exists (F5: SG-Contractor-Projects grants nothing); corrected expectations held: Public allowed, other three denied | Model Pass; **Finding F5** | outline exit criteria, ou-structure-gpo-summary.md |
+| 5 | DC01 external NTP, members on DC01, ASA clock sane | DC01 time.nist.gov stratum 2; SRV01/WS01/WS02 source DC01; ASA clock correct but NTP unconfigured (F7); switch clock unset since factory (F6) | Hosts Pass; **Findings F6, F7** | outline exit criteria |
+| 6 | dcdiag clean under DC01, five FSMO roles, SRV record resolves | All dcdiag tests passed; five roles on DC01; SRV record to dc01 = 10.10.20.10 | Pass; rename residue clear | journal only |
 
 ## Closeout (same session or same day)
 
