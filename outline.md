@@ -223,7 +223,7 @@ Asset criticality ratings justify segmentation decisions, monitoring priorities,
 
 ## Exit Criteria
 
-- [ ] All production VMs deployed and domain-joined *(closes with the era per ADR-0014; the outstanding VM was the jumpbox [CONFIRM: nothing else was planned], which carries to the new-era build)*
+- [ ] All production VMs deployed and domain-joined *(closes with the era per ADR-0014; the jumpbox was the only VM planned and never deployed, and it carries to the new-era build)*
 - [ ] Micro #1 provisioned as bare metal Wazuh host on MGMT VLAN *(carried forward per ADR-0014; Wazuh still deploys on Micro #1 in the new era)*
 - [ ] Micro #2 provisioned at Swann building with network connectivity to DVR *(retired per ADR-0014; DVR integration ends with the production era)*
 - [x] Laptops domain-joined on CLIENTS VLAN as JSS-WS01 (field) and JSS-WS02 (contractor), named and OU-placed per the workstation SOP
